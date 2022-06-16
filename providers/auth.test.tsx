@@ -4,8 +4,8 @@ const Component = () => {
   return <div>gest</div>;
 };
 
-describe("Test", () => {
-  it("test", () => {
+describe("AuthContextProvider", () => {
+  it("", () => {
     render(<Component />);
     expect(true).toBe(true);
   });

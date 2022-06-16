@@ -13,6 +13,7 @@ const AuthGuard = (props: Props) => {
 
   if (!user) {
     router.push("/sign-in");
+    return <div>Unauthorized</div>;
   }
 
   return children;
