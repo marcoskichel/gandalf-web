@@ -17,7 +17,6 @@ import {
   useMemo,
   useState,
 } from "react";
-
 import { auth } from "../config/firebase";
 
 interface AuthContextData {

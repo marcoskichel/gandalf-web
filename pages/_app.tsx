@@ -2,7 +2,6 @@ import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { AuthContextProvider } from "../providers/auth";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { CssBaseline } from "@mui/material";
 
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";

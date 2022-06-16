@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Button,
   Checkbox,
@@ -11,7 +10,6 @@ import {
   Typography,
 } from "@mui/material";
 import type { NextPage } from "next";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Head from "next/head";
 
 const SignIn: NextPage = () => {
@@ -34,9 +32,6 @@ const SignIn: NextPage = () => {
             alignItems: "center",
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-            <LockOutlinedIcon />
-          </Avatar>
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>

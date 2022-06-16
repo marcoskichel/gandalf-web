@@ -1,23 +1,14 @@
-import nookies from "nookies";
 import type { GetServerSidePropsContext, NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import checkAuthorization from "../helpers/checkAuthorization";
 import styles from "../styles/Home.module.css";
-import firebaseAdmin from "../config/firebaseAdmin";
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  try {
-    const cookies = nookies.get(ctx);
-    const token = await firebaseAdmin.auth().verifyIdToken(cookies.token);
-
-    return {
-      props: { token },
-    };
-  } catch (err) {
-    ctx.res.writeHead(302, { Location: "/sign-in" });
-    ctx.res.end();
-    return { props: {} as never };
-  }
+  const token = await checkAuthorization(ctx);
+  return {
+    props: { token },
+  };
 };
 
 const Home: NextPage = () => {
