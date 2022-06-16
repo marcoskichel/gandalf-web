@@ -2,28 +2,44 @@ import {
   Box,
   Button,
   Container,
-  FormControlLabel,
   Grid,
   Link,
   TextField,
   Typography,
 } from "@mui/material";
+import { SchemaOf, object, string } from "yup";
 import { FirebaseError } from "firebase-admin";
 import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useAuth } from "../providers/auth";
+import { useRouter } from "next/router";
 
 interface FormData {
   email: string;
   password: string;
 }
 
+const schema: SchemaOf<FormData> = object().shape({
+  email: string().email("Required field").required("Must be a password"),
+  password: string().required("Required field"),
+});
+
 const SignInForm = () => {
-  const { handleSubmit, reset, control } = useForm<FormData>();
   const { signInWithEmailAndPassword } = useAuth();
+  const router = useRouter();
+
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: yupResolver(schema),
+  });
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       await signInWithEmailAndPassword(data.email, data.password);
+      router.push("/");
     } catch (error) {
       const fbError = error as FirebaseError;
       if (
@@ -64,6 +80,8 @@ const SignInForm = () => {
                 name="email"
                 autoComplete="email"
                 autoFocus
+                error={Boolean(errors.email)}
+                helperText={errors.email?.message}
               />
             )}
           />
@@ -82,6 +100,8 @@ const SignInForm = () => {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                error={Boolean(errors.password)}
+                helperText={errors.password?.message}
               />
             )}
           />
@@ -89,7 +109,6 @@ const SignInForm = () => {
             type="submit"
             fullWidth
             variant="contained"
-            onClick={handleSubmit(onSubmit)}
             sx={{ mt: 3, mb: 2 }}
           >
             Sign In

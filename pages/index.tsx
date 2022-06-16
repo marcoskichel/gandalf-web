@@ -1,11 +1,11 @@
 import type { GetServerSidePropsContext, NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import checkAuthorization from "../helpers/checkAuthorization";
+import { checkUserIsAuthorized } from "../helpers/authorization";
 import styles from "../styles/Home.module.css";
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const token = await checkAuthorization(ctx);
+  const token = await checkUserIsAuthorized(ctx);
   return {
     props: { token },
   };

@@ -59,6 +59,18 @@ const AuthContextProvider = (props: Props) => {
     });
   }, []);
 
+  // force refresh the token every 10 minutes
+  useEffect(() => {
+    const handle = setInterval(async () => {
+      const user = auth.currentUser;
+      if (user) {
+        await user.getIdToken(true);
+      }
+    }, 10 * 60 * 1000);
+
+    return () => clearInterval(handle);
+  }, []);
+
   const signUpWithEmailAndPassoword = useCallback(
     async (email: string, password: string) => {
       setLoading(true);
