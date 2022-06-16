@@ -1,6 +1,7 @@
+import nookies from "nookies";
 import {
   createUserWithEmailAndPassword,
-  onAuthStateChanged,
+  onIdTokenChanged,
   User,
   signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
   AuthProvider,
@@ -30,7 +31,7 @@ interface AuthContextData {
     email: string,
     password: string
   ) => Promise<void>;
-  user?: User;
+  user: User | null;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -43,16 +44,19 @@ const AuthContextProvider = (props: Props) => {
   const { children } = props;
 
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
-  const [user, setUser] = useState<User>();
-
-  // Update the user state when the user changes
-  // Also sets initial loading to false after the first update
+  // Update the user state when the user changes and/or user token is refreshed
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      setUser(user || undefined);
-      setInitialLoading(false);
+    onIdTokenChanged(auth, async (user) => {
+      if (!user) {
+        setUser(null);
+        nookies.set(undefined, "token", "", { path: "/" });
+      } else {
+        const token = await user.getIdToken();
+        setUser(user);
+        nookies.set(undefined, "token", token, { path: "/" });
+      }
     });
   }, []);
 
@@ -134,11 +138,7 @@ const AuthContextProvider = (props: Props) => {
     ]
   );
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!initialLoading && children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 const useAuth = () => useContext(AuthContext);
