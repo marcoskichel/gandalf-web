@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest"
+    "test": "jest",
+    "emulators": "firebase emulators:start --import .firebase-emulators",
+    "emulators:export-on-exit": "firebase emulators:start --import .firebase-emulators --export-on-exit"
   },
   "dependencies": {
     "@emotion/react": "^11.9.3",
