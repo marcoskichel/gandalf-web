@@ -1,18 +1,11 @@
-import {
-  Box,
-  Button,
-  Container,
-  Grid,
-  Link,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { SchemaOf, object, string } from "yup";
-import { FirebaseError } from "firebase-admin";
-import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useAuth } from "../providers/auth";
+import { Box, Button, Grid, Link, TextField, Typography } from "@mui/material";
+import { FirebaseError } from "firebase-admin";
 import { useRouter } from "next/router";
+import { Controller, useForm } from "react-hook-form";
+import { object, SchemaOf, string } from "yup";
+import GoogleButton from "../components/GoogleButton";
+import { useAuth } from "../contexts/AuthContext";
 
 interface FormData {
   email: string;
@@ -25,7 +18,7 @@ const schema: SchemaOf<FormData> = object().shape({
 });
 
 const SignInForm = () => {
-  const { signInWithEmailAndPassword } = useAuth();
+  const { signInWithEmailAndPassword, signInWithGoogleAccount } = useAuth();
   const router = useRouter();
 
   const {
@@ -52,82 +45,85 @@ const SignInForm = () => {
   });
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Typography component="h1" variant="h5">
-          Sign in
-        </Typography>
-        <Box component="form" onSubmit={onSubmit} noValidate>
-          <Controller
-            name={"email"}
-            control={control}
-            render={({ field: { onChange, value } }) => (
-              <TextField
-                onChange={onChange}
-                value={value || ""}
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                autoFocus
-                error={Boolean(errors.email)}
-                helperText={errors.email?.message}
-              />
-            )}
-          />
-          <Controller
-            name={"password"}
-            control={control}
-            render={({ field: { onChange, value } }) => (
-              <TextField
-                onChange={onChange}
-                value={value || ""}
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                error={Boolean(errors.password)}
-                helperText={errors.password?.message}
-              />
-            )}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Sign In
-          </Button>
-          <Grid container>
-            <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
-            </Grid>
-            <Grid item>
-              <Link href="#" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
-            </Grid>
-          </Grid>
+    <Box
+      sx={{
+        marginTop: 8,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      <Typography component="h1" variant="h5">
+        Sign in
+      </Typography>
+      <Box component="form" onSubmit={onSubmit} noValidate>
+        <Controller
+          name={"email"}
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <TextField
+              onChange={onChange}
+              value={value || ""}
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              error={Boolean(errors.email)}
+              helperText={errors.email?.message}
+            />
+          )}
+        />
+        <Controller
+          name={"password"}
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <TextField
+              onChange={onChange}
+              value={value || ""}
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              error={Boolean(errors.password)}
+              helperText={errors.password?.message}
+            />
+          )}
+        />
+        <Button type="submit" fullWidth variant="contained" sx={{ mt: 3 }}>
+          Sign In
+        </Button>
+        <Box sx={{ m: 1 }}>
+          <Typography textAlign="center" variant="body2">
+            OR
+          </Typography>
         </Box>
+        <GoogleButton
+          sx={{ mb: 2 }}
+          onClick={signInWithGoogleAccount}
+          text="Sign In with Google"
+        />
+        <Grid container>
+          <Grid item xs>
+            <Link href="#" variant="body2">
+              Forgot password?
+            </Link>
+          </Grid>
+          <Grid item>
+            <Link href="#" variant="body2">
+              {"Don't have an account? Sign Up"}
+            </Link>
+          </Grid>
+        </Grid>
       </Box>
-    </Container>
+    </Box>
   );
 };
 

@@ -1,14 +1,16 @@
-import nookies from "nookies";
 import {
-  createUserWithEmailAndPassword,
-  onIdTokenChanged,
-  User,
-  signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
   AuthProvider,
-  signInWithRedirect,
-  signInWithPopup,
+  createUserWithEmailAndPassword,
   GoogleAuthProvider,
+  onIdTokenChanged,
+  signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
+  signInWithPopup,
+  signInWithRedirect,
+  signOut as firebaseSignOut,
+  User,
 } from "firebase/auth";
+import { useRouter } from "next/router";
+import nookies from "nookies";
 import {
   createContext,
   useCallback,
@@ -30,6 +32,7 @@ interface AuthContextData {
     email: string,
     password: string
   ) => Promise<void>;
+  signOut: () => Promise<void>;
   user: User | null;
 }
 
@@ -44,19 +47,23 @@ const AuthContextProvider = (props: Props) => {
 
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
 
-  // Update the user state when the user changes and/or user token is refreshed
+  // Update the user state when the user token changes
   useEffect(() => {
     onIdTokenChanged(auth, async (user) => {
-      if (!user) {
-        setUser(null);
-        nookies.set(undefined, "token", "", { path: "/" });
-      } else {
+      if (user) {
         const token = await user.getIdToken();
         setUser(user);
         nookies.set(undefined, "token", token, { path: "/" });
+      } else {
+        setUser(null);
+        nookies.set(undefined, "token", "", { path: "/" });
+        router.push("/sign-in");
       }
     });
+    // The router object trigger is not memoize and cause multiple re-renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // force refresh the token every 10 minutes
@@ -132,6 +139,11 @@ const AuthContextProvider = (props: Props) => {
     [signInWithProvider]
   );
 
+  const signOut = useCallback(async () => {
+    await firebaseSignOut(auth);
+    await user?.getIdToken();
+  }, [user]);
+
   const value = useMemo(
     () => ({
       loading,
@@ -139,6 +151,7 @@ const AuthContextProvider = (props: Props) => {
       signUpWithEmailAndPassoword,
       signInWithGoogleAccount,
       signInWithEmailAndPassword,
+      signOut,
     }),
     [
       loading,
@@ -146,6 +159,7 @@ const AuthContextProvider = (props: Props) => {
       signUpWithEmailAndPassoword,
       signInWithGoogleAccount,
       signInWithEmailAndPassword,
+      signOut,
     ]
   );
 
