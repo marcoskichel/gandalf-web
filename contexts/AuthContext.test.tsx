@@ -1,12 +1,36 @@
-import { render } from '@testing-library/react'
+import { useAuth } from '@contexts/AuthContext'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
-const Component = () => {
-  return <div>gest</div>
-}
+const mockCreateUserWithUserNameAndPassword = jest.fn()
+jest.mock('firebase/auth', () => ({
+  createUserWithEmailAndPassword: () => mockCreateUserWithUserNameAndPassword,
+}))
 
 describe('AuthContextProvider', () => {
-  it('', () => {
-    render(<Component />)
-    expect(true).toBe(true)
+  const Component = () => {
+    const { signUpWithEmailAndPassoword } = useAuth()
+    return (
+      <div>
+        <button
+          onClick={() =>
+            signUpWithEmailAndPassoword('user@test.com', 'test123')
+          }
+        >
+          Sign Up
+        </button>
+      </div>
+    )
+  }
+
+  describe('signUpWithEmailAndPassoword', () => {
+    it('', () => {
+      const user = userEvent.setup()
+      render(<Component />)
+
+      const btn = screen.getByRole('button')
+      user.click(btn)
+      expect(mockCreateUserWithUserNameAndPassword).toHaveBeenCalledTimes(1)
+    })
   })
 })
