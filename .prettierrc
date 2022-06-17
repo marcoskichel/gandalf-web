@@ -3,7 +3,5 @@
   "trailingComma": "es5",
   "singleQuote": true,
   "tabWidth": 2,
-  "useTabs": false,
-  "importOrderSeparation": true,
-  "importOrderSortSpecifiers": true
+  "useTabs": false
 }
