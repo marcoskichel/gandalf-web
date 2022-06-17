@@ -1,26 +1,26 @@
-import { Box, Button, Typography } from "@mui/material";
-import type { GetServerSidePropsContext, NextPage } from "next";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import { checkUserIsAuthorized } from "../helpers/authorization";
-import { useAuth } from "../contexts/AuthContext";
-import Themed from "../containers/Themed";
+import { Box, Button, Typography } from '@mui/material'
+import type { GetServerSidePropsContext, NextPage } from 'next'
+import Head from 'next/head'
+import { useRouter } from 'next/router'
+import { checkUserIsAuthorized } from '../helpers/authorization'
+import { useAuth } from '../contexts/AuthContext'
+import Themed from '../containers/Themed'
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const token = await checkUserIsAuthorized(ctx);
+  const token = await checkUserIsAuthorized(ctx)
   return {
     props: { token },
-  };
-};
+  }
+}
 
 const Home: NextPage = () => {
-  const router = useRouter();
-  const { signOut } = useAuth();
+  const router = useRouter()
+  const { signOut } = useAuth()
 
   const handleSignOut = async () => {
-    await signOut();
-    router.push("/sign-in");
-  };
+    await signOut()
+    router.push('/sign-in')
+  }
 
   return (
     <Themed>
@@ -37,7 +37,7 @@ const Home: NextPage = () => {
         </Box>
       </Box>
     </Themed>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home

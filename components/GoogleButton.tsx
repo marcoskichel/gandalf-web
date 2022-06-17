@@ -1,14 +1,14 @@
-import { Button, SxProps, Theme } from "@mui/material";
-import Image from "next/image";
+import { Button, SxProps, Theme } from '@mui/material'
+import Image from 'next/image'
 
 interface Props {
-  onClick: () => void;
-  text: string;
-  sx?: SxProps<Theme>;
+  onClick: () => void
+  text: string
+  sx?: SxProps<Theme>
 }
 
 const GoogleButton = (props: Props) => {
-  const { onClick, text, sx } = props;
+  const { onClick, text, sx } = props
   return (
     <Button
       sx={sx}
@@ -27,7 +27,7 @@ const GoogleButton = (props: Props) => {
     >
       {text}
     </Button>
-  );
-};
+  )
+}
 
-export default GoogleButton;
+export default GoogleButton

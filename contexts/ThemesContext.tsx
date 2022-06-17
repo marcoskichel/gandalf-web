@@ -1,60 +1,60 @@
-import { createTheme, Theme } from "@mui/material";
-import { createContext, useCallback, useContext, useState } from "react";
+import { createTheme, Theme } from '@mui/material'
+import { createContext, useCallback, useContext, useState } from 'react'
 
-declare module "@mui/material" {
+declare module '@mui/material' {
   interface Palette {
-    neutral: Palette["primary"];
+    neutral: Palette['primary']
   }
   interface PaletteOptions {
-    neutral: PaletteOptions["primary"];
+    neutral: PaletteOptions['primary']
   }
 }
 
-declare module "@mui/material/Button" {
+declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {
-    neutral: true;
+    neutral: true
   }
 }
 
 interface AppThemes {
-  light: Theme;
-  dark: Theme;
+  light: Theme
+  dark: Theme
 }
 
 const lightTheme = createTheme({
   palette: {
     neutral: {
-      main: "#FFF",
-      contrastText: "#616161",
+      main: '#FFF',
+      contrastText: '#616161',
     },
   },
-});
+})
 
 interface ContextData {
-  currentTheme: Theme;
-  switchTheme: (name: keyof AppThemes) => void;
+  currentTheme: Theme
+  switchTheme: (name: keyof AppThemes) => void
 }
 
 const ThemesContext = createContext<ContextData>({
   currentTheme: lightTheme,
   switchTheme: () => {},
-});
+})
 
-const availableThemes = { light: lightTheme, dark: lightTheme };
+const availableThemes = { light: lightTheme, dark: lightTheme }
 
 interface Props {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 // TODO: Implement dark mode
 const ThemesContextProvider = (props: Props) => {
-  const { children } = props;
+  const { children } = props
 
-  const [currentTheme, setCurrentTheme] = useState<Theme>(lightTheme);
+  const [currentTheme, setCurrentTheme] = useState<Theme>(lightTheme)
 
   const switchTheme = useCallback((name: keyof AppThemes) => {
-    setCurrentTheme(availableThemes[name]);
-  }, []);
+    setCurrentTheme(availableThemes[name])
+  }, [])
 
   return (
     <ThemesContext.Provider
@@ -65,10 +65,10 @@ const ThemesContextProvider = (props: Props) => {
     >
       {children}
     </ThemesContext.Provider>
-  );
-};
+  )
+}
 
-const useThemes = () => useContext(ThemesContext);
+const useThemes = () => useContext(ThemesContext)
 
-export default ThemesContext;
-export { ThemesContextProvider, useThemes };
+export default ThemesContext
+export { ThemesContextProvider, useThemes }

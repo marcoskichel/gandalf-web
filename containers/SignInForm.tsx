@@ -1,25 +1,25 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Box, Button, Grid, Link, TextField, Typography } from "@mui/material";
-import { FirebaseError } from "firebase-admin";
-import { useRouter } from "next/router";
-import { Controller, useForm } from "react-hook-form";
-import { object, SchemaOf, string } from "yup";
-import GoogleButton from "../components/GoogleButton";
-import { useAuth } from "../contexts/AuthContext";
+import { yupResolver } from '@hookform/resolvers/yup'
+import { Box, Button, Grid, Link, TextField, Typography } from '@mui/material'
+import { FirebaseError } from 'firebase-admin'
+import { useRouter } from 'next/router'
+import { Controller, useForm } from 'react-hook-form'
+import { SchemaOf, object, string } from 'yup'
+import GoogleButton from '../components/GoogleButton'
+import { useAuth } from '../contexts/AuthContext'
 
 interface FormData {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 const schema: SchemaOf<FormData> = object().shape({
-  email: string().email("Required field").required("Must be a password"),
-  password: string().required("Required field"),
-});
+  email: string().email('Required field').required('Must be a password'),
+  password: string().required('Required field'),
+})
 
 const SignInForm = () => {
-  const { signInWithEmailAndPassword, signInWithGoogleAccount } = useAuth();
-  const router = useRouter();
+  const { signInWithEmailAndPassword, signInWithGoogleAccount } = useAuth()
+  const router = useRouter()
 
   const {
     handleSubmit,
@@ -27,41 +27,41 @@ const SignInForm = () => {
     formState: { errors },
   } = useForm<FormData>({
     resolver: yupResolver(schema),
-  });
+  })
 
   const signIn = async (
     delegate: (username: string, password: string) => Promise<void>,
     data?: FormData
   ) => {
     try {
-      await delegate(data?.email as string, data?.password as string);
-      router.push("/");
+      await delegate(data?.email as string, data?.password as string)
+      router.push('/')
     } catch (error) {
-      const fbError = error as FirebaseError;
+      const fbError = error as FirebaseError
       if (
-        fbError.code === "auth/user-not-found" ||
-        fbError.code === "auth/wrong-password"
+        fbError.code === 'auth/user-not-found' ||
+        fbError.code === 'auth/wrong-password'
       ) {
-        alert("invalid user");
+        alert('invalid user')
       }
     }
-  };
+  }
 
   const onSubmit = handleSubmit(async (data) => {
-    await signIn(signInWithEmailAndPassword, data);
-  });
+    await signIn(signInWithEmailAndPassword, data)
+  })
 
   const onGoogleSignIn = async () => {
-    await signIn(signInWithGoogleAccount);
-  };
+    await signIn(signInWithGoogleAccount)
+  }
 
   return (
     <Box
       sx={{
         marginTop: 8,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
       }}
     >
       <Typography component="h1" variant="h5">
@@ -69,12 +69,12 @@ const SignInForm = () => {
       </Typography>
       <Box component="form" onSubmit={onSubmit} noValidate>
         <Controller
-          name={"email"}
+          name={'email'}
           control={control}
           render={({ field: { onChange, value } }) => (
             <TextField
               onChange={onChange}
-              value={value || ""}
+              value={value || ''}
               margin="normal"
               required
               fullWidth
@@ -89,12 +89,12 @@ const SignInForm = () => {
           )}
         />
         <Controller
-          name={"password"}
+          name={'password'}
           control={control}
           render={({ field: { onChange, value } }) => (
             <TextField
               onChange={onChange}
-              value={value || ""}
+              value={value || ''}
               margin="normal"
               required
               fullWidth
@@ -135,7 +135,7 @@ const SignInForm = () => {
         </Grid>
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default SignInForm;
+export default SignInForm
