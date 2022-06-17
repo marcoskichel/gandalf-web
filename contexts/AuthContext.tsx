@@ -5,7 +5,6 @@ import {
   onIdTokenChanged,
   signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
   signInWithPopup,
-  signInWithRedirect,
   signOut as firebaseSignOut,
   User,
 } from "firebase/auth";
@@ -109,30 +108,21 @@ const AuthContextProvider = (props: Props) => {
     []
   );
 
-  const signInWithProvider = useCallback(
-    async (provider: AuthProvider, redirect = false) => {
-      try {
-        const result = redirect
-          ? await signInWithRedirect(auth, provider)
-          : await signInWithPopup(auth, provider);
-
-        if (result.user) {
-          setUser(result.user);
-        }
-      } finally {
-        setLoading(false);
+  const signInWithProvider = useCallback(async (provider: AuthProvider) => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      if (result.user) {
+        setUser(result.user);
       }
-    },
-    []
-  );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const signInWithGoogleAccount = useCallback(
-    async (redirect = false) => {
-      const provider = new GoogleAuthProvider();
-      return signInWithProvider(provider, redirect);
-    },
-    [signInWithProvider]
-  );
+  const signInWithGoogleAccount = useCallback(async () => {
+    const provider = new GoogleAuthProvider();
+    return signInWithProvider(provider);
+  }, [signInWithProvider]);
 
   const signOut = useCallback(async () => {
     await firebaseSignOut(auth);
