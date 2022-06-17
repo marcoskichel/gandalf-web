@@ -1,11 +1,11 @@
+import GoogleButton from '@components/GoogleButton'
+import { useAuth } from '@contexts/AuthContext'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Box, Button, Grid, Link, TextField, Typography } from '@mui/material'
 import { FirebaseError } from 'firebase-admin'
 import { useRouter } from 'next/router'
 import { Controller, useForm } from 'react-hook-form'
 import { SchemaOf, object, string } from 'yup'
-import GoogleButton from '../components/GoogleButton'
-import { useAuth } from '../contexts/AuthContext'
 
 interface FormData {
   email: string

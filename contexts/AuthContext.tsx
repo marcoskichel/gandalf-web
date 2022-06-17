@@ -1,12 +1,13 @@
+import { auth } from '@config/firebase'
 import {
   AuthProvider,
-  createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  onIdTokenChanged,
-  signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
-  signInWithPopup,
-  signOut as firebaseSignOut,
   User,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  onIdTokenChanged,
+  signInWithPopup,
 } from 'firebase/auth'
 import nookies from 'nookies'
 import {
@@ -17,7 +18,6 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { auth } from '../config/firebase'
 
 interface AuthContextData {
   loading: boolean

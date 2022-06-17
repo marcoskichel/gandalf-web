@@ -1,4 +1,4 @@
-import { createTheme, Theme } from '@mui/material'
+import { Theme, createTheme } from '@mui/material'
 import { createContext, useCallback, useContext, useState } from 'react'
 
 declare module '@mui/material' {

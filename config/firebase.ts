@@ -1,8 +1,8 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApp, getApps } from 'firebase/app'
+import firebaseConfig from '@constants/firebaseConfig'
+import { getApp, getApps, initializeApp } from 'firebase/app'
 import { connectAuthEmulator, getAuth } from 'firebase/auth'
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore'
-import firebaseConfig from '../constants/firebaseConfig'
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
 const db = getFirestore(app)

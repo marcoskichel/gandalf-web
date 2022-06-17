@@ -1,9 +1,9 @@
+import SignInForm from '@containers/SignInForm'
+import Themed from '@containers/Themed'
+import { checkUserIsNotAuthorized } from '@helpers/authorization'
 import { Container } from '@mui/material'
 import type { GetServerSidePropsContext, NextPage } from 'next'
 import Head from 'next/head'
-import SignInForm from '../containers/SignInForm'
-import Themed from '../containers/Themed'
-import { checkUserIsNotAuthorized } from '../helpers/authorization'
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   await checkUserIsNotAuthorized(ctx)

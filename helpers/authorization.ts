@@ -1,6 +1,6 @@
-import nookies from 'nookies'
+import firebaseAdmin from '@config/firebaseAdmin'
 import { GetServerSidePropsContext } from 'next'
-import firebaseAdmin from '../config/firebaseAdmin'
+import nookies from 'nookies'
 
 const checkUserIsAuthorized = async (ctx: GetServerSidePropsContext) => {
   try {

@@ -1,6 +1,6 @@
+import { useThemes } from '@contexts/ThemesContext'
 import { ThemeProvider } from '@emotion/react'
 import { CssBaseline } from '@mui/material'
-import { useThemes } from '../contexts/ThemesContext'
 
 interface Props {
   children: React.ReactNode
