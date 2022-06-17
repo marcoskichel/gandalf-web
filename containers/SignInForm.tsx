@@ -29,9 +29,12 @@ const SignInForm = () => {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = handleSubmit(async (data) => {
+  const signIn = async (
+    delegate: (username: string, password: string) => Promise<void>,
+    data?: FormData
+  ) => {
     try {
-      await signInWithEmailAndPassword(data.email, data.password);
+      await delegate(data?.email as string, data?.password as string);
       router.push("/");
     } catch (error) {
       const fbError = error as FirebaseError;
@@ -42,7 +45,15 @@ const SignInForm = () => {
         alert("invalid user");
       }
     }
+  };
+
+  const onSubmit = handleSubmit(async (data) => {
+    await signIn(signInWithEmailAndPassword, data);
   });
+
+  const onGoogleSignIn = async () => {
+    await signIn(signInWithGoogleAccount);
+  };
 
   return (
     <Box
@@ -107,7 +118,7 @@ const SignInForm = () => {
         </Box>
         <GoogleButton
           sx={{ mb: 2 }}
-          onClick={signInWithGoogleAccount}
+          onClick={onGoogleSignIn}
           text="Sign In with Google"
         />
         <Grid container>

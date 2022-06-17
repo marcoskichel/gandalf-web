@@ -9,7 +9,6 @@ import {
   signOut as firebaseSignOut,
   User,
 } from "firebase/auth";
-import { useRouter } from "next/router";
 import nookies from "nookies";
 import {
   createContext,
@@ -47,7 +46,6 @@ const AuthContextProvider = (props: Props) => {
 
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const router = useRouter();
 
   // Update the user state when the user token changes
   useEffect(() => {
@@ -59,11 +57,8 @@ const AuthContextProvider = (props: Props) => {
       } else {
         setUser(null);
         nookies.set(undefined, "token", "", { path: "/" });
-        router.push("/sign-in");
       }
     });
-    // The router object trigger is not memoize and cause multiple re-renders.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // force refresh the token every 10 minutes
@@ -115,7 +110,7 @@ const AuthContextProvider = (props: Props) => {
   );
 
   const signInWithProvider = useCallback(
-    async (provider: AuthProvider, redirect = true) => {
+    async (provider: AuthProvider, redirect = false) => {
       try {
         const result = redirect
           ? await signInWithRedirect(auth, provider)
@@ -132,7 +127,7 @@ const AuthContextProvider = (props: Props) => {
   );
 
   const signInWithGoogleAccount = useCallback(
-    async (redirect = true) => {
+    async (redirect = false) => {
       const provider = new GoogleAuthProvider();
       return signInWithProvider(provider, redirect);
     },

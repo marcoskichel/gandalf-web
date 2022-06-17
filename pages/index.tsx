@@ -1,6 +1,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import type { GetServerSidePropsContext, NextPage } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { checkUserIsAuthorized } from "../helpers/authorization";
 import { useAuth } from "../contexts/AuthContext";
 import Themed from "../containers/Themed";
@@ -13,7 +14,13 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 };
 
 const Home: NextPage = () => {
+  const router = useRouter();
   const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/sign-in");
+  };
 
   return (
     <Themed>
@@ -26,7 +33,7 @@ const Home: NextPage = () => {
 
         <Box component="main">
           <Typography variant="h3">Home</Typography>
-          <Button onClick={signOut}>Sign out</Button>
+          <Button onClick={handleSignOut}>Sign out</Button>
         </Box>
       </Box>
     </Themed>
