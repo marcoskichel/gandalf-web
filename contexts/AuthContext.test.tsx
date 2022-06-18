@@ -1,36 +1,154 @@
-import { useAuth } from '@contexts/AuthContext'
-import { render, screen } from '@testing-library/react'
+import { AuthContextProvider, useAuth } from '@contexts/AuthContext'
+import {
+  render,
+  screen,
+  waitForElementToBeRemoved,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-const mockCreateUserWithUserNameAndPassword = jest.fn()
-jest.mock('firebase/auth', () => ({
-  createUserWithEmailAndPassword: () => mockCreateUserWithUserNameAndPassword,
-}))
+jest.mock('firebase/app')
+jest.mock('firebase/auth')
+jest.mock('firebase/firestore')
 
 describe('AuthContextProvider', () => {
-  const Component = () => {
-    const { signUpWithEmailAndPassoword } = useAuth()
-    return (
-      <div>
-        <button
-          onClick={() =>
-            signUpWithEmailAndPassoword('user@test.com', 'test123')
-          }
-        >
-          Sign Up
-        </button>
-      </div>
-    )
-  }
-
   describe('signUpWithEmailAndPassoword', () => {
-    it('', () => {
+    const Component = () => {
+      const { signUpWithEmailAndPassoword, user, loading } = useAuth()
+      return (
+        <div>
+          <span>{loading && 'Loading...'}</span>
+          <span>{user && 'User logged in'}</span>
+          <button
+            onClick={() =>
+              signUpWithEmailAndPassoword('user@test.com', 'test123')
+            }
+          >
+            Sign Up
+          </button>
+        </div>
+      )
+    }
+
+    it('sign the user up and automatically sign in', async () => {
       const user = userEvent.setup()
-      render(<Component />)
+      render(
+        <AuthContextProvider>
+          <Component />
+        </AuthContextProvider>
+      )
 
       const btn = screen.getByRole('button')
       user.click(btn)
-      expect(mockCreateUserWithUserNameAndPassword).toHaveBeenCalledTimes(1)
+      const loading = await screen.findByText('Loading...')
+      const userLoggedIn = await screen.findByText('User logged in')
+      expect(loading).toBeInTheDocument()
+      expect(userLoggedIn).toBeInTheDocument()
+    })
+
+    it('resets loading afterwards', async () => {
+      const user = userEvent.setup()
+      render(
+        <AuthContextProvider>
+          <Component />
+        </AuthContextProvider>
+      )
+
+      const btn = screen.getByRole('button')
+      user.click(btn)
+      const loading = await screen.findByText('Loading...')
+      waitForElementToBeRemoved(loading)
+    })
+  })
+
+  describe('signInWithEmailAndPassoword', () => {
+    const Component = () => {
+      const { signInWithEmailAndPassword, user, loading } = useAuth()
+      return (
+        <div>
+          <span>{loading && 'Loading...'}</span>
+          <span>{user && 'User logged in'}</span>
+          <button
+            onClick={() =>
+              signInWithEmailAndPassword('user@test.com', 'test123')
+            }
+          >
+            Sign In
+          </button>
+        </div>
+      )
+    }
+
+    it('sign the user in', async () => {
+      const user = userEvent.setup()
+      render(
+        <AuthContextProvider>
+          <Component />
+        </AuthContextProvider>
+      )
+
+      const btn = screen.getByRole('button')
+      user.click(btn)
+      const loading = await screen.findByText('Loading...')
+      const userLoggedIn = await screen.findByText('User logged in')
+      expect(loading).toBeInTheDocument()
+      expect(userLoggedIn).toBeInTheDocument()
+    })
+
+    it('resets loading afterwards', async () => {
+      const user = userEvent.setup()
+      render(
+        <AuthContextProvider>
+          <Component />
+        </AuthContextProvider>
+      )
+
+      const btn = screen.getByRole('button')
+      user.click(btn)
+      const loading = await screen.findByText('Loading...')
+      waitForElementToBeRemoved(loading)
+    })
+  })
+
+  describe('signInWithGoogleAccount', () => {
+    const Component = () => {
+      const { signInWithGoogleAccount, user, loading } = useAuth()
+      return (
+        <div>
+          <span>{loading && 'Loading...'}</span>
+          <span>{user && 'User logged in'}</span>
+          <button onClick={() => signInWithGoogleAccount()}>Sign In</button>
+        </div>
+      )
+    }
+
+    it('sign the user in', async () => {
+      const user = userEvent.setup()
+      render(
+        <AuthContextProvider>
+          <Component />
+        </AuthContextProvider>
+      )
+
+      const btn = screen.getByRole('button')
+      user.click(btn)
+      const loading = await screen.findByText('Loading...')
+      const userLoggedIn = await screen.findByText('User logged in')
+      expect(loading).toBeInTheDocument()
+      expect(userLoggedIn).toBeInTheDocument()
+    })
+
+    it('resets loading afterwards', async () => {
+      const user = userEvent.setup()
+      render(
+        <AuthContextProvider>
+          <Component />
+        </AuthContextProvider>
+      )
+
+      const btn = screen.getByRole('button')
+      user.click(btn)
+      const loading = await screen.findByText('Loading...')
+      waitForElementToBeRemoved(loading)
     })
   })
 })

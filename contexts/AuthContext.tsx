@@ -69,7 +69,7 @@ const AuthContextProvider = (props: Props) => {
     return () => clearInterval(handle)
   }, [])
 
-  const signUpWithEmailAndPassoword = useCallback(
+  const signUpWithEmailAndPassword = useCallback(
     async (email: string, password: string) => {
       setLoading(true)
       try {
@@ -107,6 +107,7 @@ const AuthContextProvider = (props: Props) => {
 
   const signInWithProvider = useCallback(async (provider: AuthProvider) => {
     try {
+      setLoading(true)
       const result = await signInWithPopup(auth, provider)
       if (result.user) {
         setUser(result.user)
@@ -130,7 +131,7 @@ const AuthContextProvider = (props: Props) => {
     () => ({
       loading,
       user,
-      signUpWithEmailAndPassoword,
+      signUpWithEmailAndPassoword: signUpWithEmailAndPassword,
       signInWithGoogleAccount,
       signInWithEmailAndPassword,
       signOut,
@@ -138,7 +139,7 @@ const AuthContextProvider = (props: Props) => {
     [
       loading,
       user,
-      signUpWithEmailAndPassoword,
+      signUpWithEmailAndPassword,
       signInWithGoogleAccount,
       signInWithEmailAndPassword,
       signOut,

@@ -4,7 +4,8 @@ const createJestConfig = nextJest({
   dir: './',
 })
 
-const customJestConfig = {
+const config = {
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleDirectories: ['node_modules', '<rootDir>/'],
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
@@ -17,4 +18,15 @@ const customJestConfig = {
   },
 }
 
-module.exports = createJestConfig(customJestConfig)
+const getConfig = createJestConfig(config)
+
+module.exports = async () => {
+  const nextJestConfig = await getConfig()
+  const transformIgnorePatterns = [
+    '/node_modules/(?!firebase/*|@firebase/*)',
+    ...nextJestConfig.transformIgnorePatterns.filter(
+      (pattern) => pattern !== '/node_modules/'
+    )
+  ]
+  return {...nextJestConfig, transformIgnorePatterns}
+}
