@@ -48,7 +48,6 @@
     "eslint-config-prettier": "^8.5.0",
     "jest": "^28.1.1",
     "jest-environment-jsdom": "^28.1.1",
-    "mock-firebase-ts": "^2.4.0",
     "prettier": "^2.7.1",
     "typescript": "4.7.3"
   }
