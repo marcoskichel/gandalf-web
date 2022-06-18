@@ -2,7 +2,7 @@ import { Button, SxProps, Theme } from '@mui/material'
 import Image from 'next/image'
 
 interface Props {
-  onClick: () => void
+  onClick?: () => void
   text: string
   sx?: SxProps<Theme>
 }

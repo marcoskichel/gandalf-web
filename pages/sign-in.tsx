@@ -1,5 +1,7 @@
 import SignInForm from '@containers/SignInForm'
 import Themed from '@containers/Themed'
+import Toaster from '@containers/Toaster'
+import { ToasterContextProvider } from '@contexts/ToasterContext'
 import { checkUserIsNotAuthorized } from '@helpers/authorization'
 import { Container } from '@mui/material'
 import type { GetServerSidePropsContext, NextPage } from 'next'
@@ -13,13 +15,16 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 const SignIn: NextPage = () => {
   return (
     <Themed>
-      <Head>
-        <title>Gandalf</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Container component="main" maxWidth="xs">
-        <SignInForm />
-      </Container>
+      <ToasterContextProvider>
+        <Head>
+          <title>Gandalf</title>
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <Container component="main" maxWidth="xs">
+          <SignInForm />
+        </Container>
+        <Toaster />
+      </ToasterContextProvider>
     </Themed>
   )
 }

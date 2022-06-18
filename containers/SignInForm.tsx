@@ -1,5 +1,6 @@
 import GoogleButton from '@components/GoogleButton'
 import { useAuth } from '@contexts/AuthContext'
+import { useToaster } from '@contexts/ToasterContext'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Box, Button, Grid, Link, TextField, Typography } from '@mui/material'
 import { FirebaseError } from 'firebase-admin'
@@ -20,6 +21,7 @@ const schema: SchemaOf<FormData> = object().shape({
 const SignInForm = () => {
   const { signInWithEmailAndPassword, signInWithGoogleAccount } = useAuth()
   const router = useRouter()
+  const { setToast } = useToaster()
 
   const {
     handleSubmit,
@@ -42,7 +44,10 @@ const SignInForm = () => {
         fbError.code === 'auth/user-not-found' ||
         fbError.code === 'auth/wrong-password'
       ) {
-        alert('invalid user')
+        setToast({
+          message: 'Invalid credentials, please try again.',
+          severity: 'error',
+        })
       }
     }
   }
