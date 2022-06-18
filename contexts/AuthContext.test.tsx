@@ -11,16 +11,16 @@ jest.mock('firebase/auth')
 jest.mock('firebase/firestore')
 
 describe('AuthContextProvider', () => {
-  describe('signUpWithEmailAndPassoword', () => {
+  describe('signUpWithEmailAndPassword', () => {
     const Component = () => {
-      const { signUpWithEmailAndPassoword, user, loading } = useAuth()
+      const { signUpWithEmailAndPassword, user, loading } = useAuth()
       return (
         <div>
           <span>{loading && 'Loading...'}</span>
           <span>{user && 'User logged in'}</span>
           <button
             onClick={() =>
-              signUpWithEmailAndPassoword('user@test.com', 'test123')
+              signUpWithEmailAndPassword('user@test.com', 'test123')
             }
           >
             Sign Up

@@ -21,10 +21,7 @@ import {
 
 interface AuthContextData {
   loading: boolean
-  signUpWithEmailAndPassoword: (
-    email: string,
-    password: string
-  ) => Promise<void>
+  signUpWithEmailAndPassword: (email: string, password: string) => Promise<void>
   signInWithGoogleAccount: () => Promise<void>
   signInWithEmailAndPassword: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
@@ -131,7 +128,7 @@ const AuthContextProvider = (props: Props) => {
     () => ({
       loading,
       user,
-      signUpWithEmailAndPassoword: signUpWithEmailAndPassword,
+      signUpWithEmailAndPassword,
       signInWithGoogleAccount,
       signInWithEmailAndPassword,
       signOut,
