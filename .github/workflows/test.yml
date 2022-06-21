@@ -1,0 +1,27 @@
+name: Run automated tests
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+jobs:
+  lint:
+    name: Run linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16.14.2
+      - run: npm ci
+      - run: npm run lint
+  
+  unit-tests: 
+    name: 'Run unit tests'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16.14.2
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test
