@@ -122,7 +122,7 @@ describe('SignInForm', () => {
       })
     }
 
-    it('Shows an error toast when using wrong username', async () => {
+    it('shows an error toast when using wrong username', async () => {
       auth.signInWithEmailAndPassword.mockRejectedValueOnce({
         code: 'auth/user-not-found',
       })
@@ -134,7 +134,7 @@ describe('SignInForm', () => {
       })
     })
 
-    it('Shows an error toast when using wrong password', async () => {
+    it('shows an error toast when using wrong password', async () => {
       auth.signInWithEmailAndPassword.mockRejectedValueOnce({
         code: 'auth/wrong-password',
       })
@@ -146,7 +146,7 @@ describe('SignInForm', () => {
       })
     })
 
-    it('Redirects authorized users to the Home page', async () => {
+    it('redirects authorized users to the Home page', async () => {
       const router = useRouter()
       const mockPush = router.push as jest.Mock
 
