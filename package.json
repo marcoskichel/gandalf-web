@@ -12,7 +12,7 @@
     "check-types": "tsc --noEmit",
     "lint": "next lint",
     "format": "prettier --write --ignore-path .gitignore .",
-    "test": "jest --watch",
+    "test": "jest",
     "emulators": "firebase emulators:start --import .firebase-emulators",
     "emulators:export-on-exit": "firebase emulators:start --import .firebase-emulators --export-on-exit"
   },
