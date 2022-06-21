@@ -23,7 +23,7 @@ const getConfig = createJestConfig(config)
 module.exports = async () => {
   const nextJestConfig = await getConfig()
   const transformIgnorePatterns = [
-    '/node_modules/(?!firebase/*|@firebase/*)',
+    '/node_modules/(?!firebase/*|@firebase/*|@hookform/*)',
     ...nextJestConfig.transformIgnorePatterns.filter(
       (pattern) => pattern !== '/node_modules/'
     )

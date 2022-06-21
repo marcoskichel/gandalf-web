@@ -14,8 +14,10 @@ interface FormData {
 }
 
 const schema: SchemaOf<FormData> = object().shape({
-  email: string().email('Required field').required('Must be a password'),
-  password: string().required('Required field'),
+  email: string()
+    .email('Must be an email address')
+    .required('Email Address is a required field'),
+  password: string().required('Password is a required field'),
 })
 
 const SignInForm = () => {
@@ -48,6 +50,8 @@ const SignInForm = () => {
           message: 'Invalid credentials, please try again.',
           severity: 'error',
         })
+      } else {
+        throw error
       }
     }
   }
@@ -62,6 +66,7 @@ const SignInForm = () => {
 
   return (
     <Box
+      data-testid="sign-in-form"
       sx={{
         marginTop: 8,
         display: 'flex',
@@ -110,6 +115,7 @@ const SignInForm = () => {
               autoComplete="current-password"
               error={Boolean(errors.password)}
               helperText={errors.password?.message}
+              inputProps={{ 'data-testid': 'password-input' }}
             />
           )}
         />
