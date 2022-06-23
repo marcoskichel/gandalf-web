@@ -35,6 +35,25 @@ const lightTheme = createTheme({
   },
 })
 
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    background: {
+      default: '#303030',
+      paper: '#424242',
+    },
+    primary: {
+      main: '#6B68F1',
+      light: '#D2C1FF',
+      dark: '#4A4FD3',
+    },
+    neutral: {
+      main: '#424242',
+      contrastText: '#fff',
+    },
+  },
+})
+
 interface ContextData {
   currentTheme: Theme
   switchTheme: (name: keyof AppThemes) => void
@@ -45,7 +64,7 @@ const ThemesContext = createContext<ContextData>({
   switchTheme: () => {},
 })
 
-const availableThemes = { light: lightTheme, dark: lightTheme }
+const availableThemes = { light: lightTheme, dark: darkTheme }
 
 interface Props {
   children: React.ReactNode
@@ -55,7 +74,7 @@ interface Props {
 const ThemesContextProvider = (props: Props) => {
   const { children } = props
 
-  const [currentTheme, setCurrentTheme] = useState<Theme>(lightTheme)
+  const [currentTheme, setCurrentTheme] = useState<Theme>(darkTheme)
 
   const switchTheme = useCallback((name: keyof AppThemes) => {
     setCurrentTheme(availableThemes[name])
