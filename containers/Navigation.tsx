@@ -2,14 +2,12 @@ import Routes from '@constants/routes'
 import { useAuth } from '@contexts/AuthContext'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ExitIcon from '@mui/icons-material/ExitToApp'
-import MenuIcon from '@mui/icons-material/Menu'
 import SettingsIcon from '@mui/icons-material/Settings'
 import {
   Box,
   AppBar,
   Toolbar,
   Typography,
-  Button,
   styled,
   IconButton,
 } from '@mui/material'
@@ -19,25 +17,6 @@ import { useRouter } from 'next/router'
 interface Link {
   label: string
   path: string
-}
-
-interface NavItemProps {
-  link: Link
-}
-
-const NavItem = (props: NavItemProps) => {
-  const { link } = props
-  const router = useRouter()
-
-  return (
-    <Button
-      size="large"
-      onClick={() => router.push(link.path)}
-      sx={{ display: 'block', color: 'white' }}
-    >
-      {link.label}
-    </Button>
-  )
 }
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
@@ -61,8 +40,6 @@ const Navigation = (props: Props) => {
   const { user, signOut } = useAuth()
   const router = useRouter()
 
-  const links: Link[] = [{ label: 'Home', path: Routes.home }]
-
   const handleSignOut = async () => {
     await signOut()
     router.push(Routes.signIn)
@@ -71,16 +48,6 @@ const Navigation = (props: Props) => {
   return (
     <AppBar position="static" sx={{ mb: 4 }}>
       <StyledToolbar>
-        <IconButton
-          size="large"
-          edge="start"
-          color="inherit"
-          aria-label="open drawer"
-          sx={{ mr: 2, visibility: { md: 'hidden' } }}
-        >
-          <MenuIcon />
-        </IconButton>
-        {user && links.map((link) => <NavItem key={link.label} link={link} />)}
         <Box
           sx={{
             flexGrow: 1,
