@@ -23,6 +23,11 @@ interface AppThemes {
 
 const lightTheme = createTheme({
   palette: {
+    primary: {
+      main: '#6200ea',
+      light: '#9d46ff',
+      dark: '#320b86',
+    },
     neutral: {
       main: '#FFF',
       contrastText: '#616161',

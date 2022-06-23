@@ -75,9 +75,6 @@ const SignInForm = () => {
         alignItems: 'center',
       }}
     >
-      <Typography component="h1" variant="h5">
-        Sign in
-      </Typography>
       <Box component="form" onSubmit={onSubmit} noValidate>
         <Controller
           name={'email'}
