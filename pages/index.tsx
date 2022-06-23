@@ -1,3 +1,4 @@
+import Routes from '@constants/routes'
 import Themed from '@containers/Themed'
 import { useAuth } from '@contexts/AuthContext'
 import { checkUserIsAuthorized } from '@helpers/authorization'
@@ -19,7 +20,7 @@ const Home: NextPage = () => {
 
   const handleSignOut = async () => {
     await signOut()
-    router.push('/sign-in')
+    router.push(Routes.signIn)
   }
 
   return (

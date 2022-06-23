@@ -1,4 +1,5 @@
 import { auth } from '@config/firebase'
+import Routes from '@constants/routes'
 import {
   AuthProvider,
   GoogleAuthProvider,
@@ -46,10 +47,10 @@ const AuthContextProvider = (props: Props) => {
       if (user) {
         const token = await user.getIdToken()
         setUser(user)
-        nookies.set(undefined, 'token', token, { path: '/' })
+        nookies.set(undefined, 'token', token, { path: Routes.home })
       } else {
         setUser(null)
-        nookies.set(undefined, 'token', '', { path: '/' })
+        nookies.set(undefined, 'token', '', { path: Routes.home })
       }
     })
   }, [])

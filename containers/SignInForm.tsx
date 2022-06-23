@@ -1,4 +1,5 @@
 import GoogleButton from '@components/GoogleButton'
+import Routes from '@constants/routes'
 import { useAuth } from '@contexts/AuthContext'
 import { useToaster } from '@contexts/ToasterContext'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -39,7 +40,7 @@ const SignInForm = () => {
   ) => {
     try {
       await delegate(data?.email as string, data?.password as string)
-      router.push('/')
+      router.push(Routes.home)
     } catch (error) {
       const fbError = error as FirebaseError
       if (
