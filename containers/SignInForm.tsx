@@ -69,7 +69,6 @@ const SignInForm = () => {
     <Box
       data-testid="sign-in-form"
       sx={{
-        marginTop: 8,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
