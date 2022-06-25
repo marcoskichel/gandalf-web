@@ -11,21 +11,21 @@ import {
   Select,
   TextField,
 } from '@mui/material'
-import { GuardRequirement } from 'models/Guard'
+import { TokenGateRequirement } from 'models/TokenGate'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { number, string, object } from 'yup'
 
-interface GuardFormProps {
-  requirement?: GuardRequirement
-  existingRequirements?: GuardRequirement[]
-  onDelete?: (req: GuardRequirement) => void
-  onAdd?: (req: GuardRequirement) => void
+interface Props {
+  requirement?: TokenGateRequirement
+  existingRequirements?: TokenGateRequirement[]
+  onDelete?: (req: TokenGateRequirement) => void
+  onAdd?: (req: TokenGateRequirement) => void
 }
 
 const onlyNumbers = /^[0-9\b]+$/
 
-const GuardRequirementForm = (props: GuardFormProps) => {
+const TokenGateRequirementForm = (props: Props) => {
   const {
     requirement,
     existingRequirements = [],
@@ -52,14 +52,14 @@ const GuardRequirementForm = (props: GuardFormProps) => {
     formState: { errors },
     setValue,
     reset,
-  } = useForm<GuardRequirement>({
+  } = useForm<TokenGateRequirement>({
     resolver: yupResolver(schema),
   })
 
   useEffect(() => {
     if (requirement) {
       Object.keys(requirement)
-        .map((key) => key as keyof GuardRequirement)
+        .map((key) => key as keyof TokenGateRequirement)
         .forEach((key) => setValue(key, requirement[key]))
     }
   }, [requirement, setValue])
@@ -70,7 +70,7 @@ const GuardRequirementForm = (props: GuardFormProps) => {
   })
 
   const handleDelete = () => {
-    onDelete(requirement as GuardRequirement)
+    onDelete(requirement as TokenGateRequirement)
   }
 
   return (
@@ -168,4 +168,4 @@ const GuardRequirementForm = (props: GuardFormProps) => {
   )
 }
 
-export default GuardRequirementForm
+export default TokenGateRequirementForm

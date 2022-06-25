@@ -1,7 +1,7 @@
-import GuardRequirementForm from '@components/GuardRequirementForm'
+import TokenGateRequirementForm from '@components/TokenGateRequirementForm'
 import { getDateError } from '@helpers/validations'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { Guard, GuardRequirement } from '@models/Guard'
+import { TokenGate, TokenGateRequirement } from '@models/TokenGate'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Container, TextField, Typography } from '@mui/material'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { array, date, object, SchemaOf, string, number } from 'yup'
 
-const schema: SchemaOf<Guard> = object().shape({
+const schema: SchemaOf<TokenGate> = object().shape({
   name: string().required('Name is a required field'),
   description: string().optional(),
   startDateTime: date().typeError('State Date must be a date value').optional(),
@@ -23,7 +23,7 @@ const schema: SchemaOf<Guard> = object().shape({
   ),
 })
 
-const GuardForm = () => {
+const TokenGateForm = () => {
   const {
     handleSubmit,
     control,
@@ -31,11 +31,11 @@ const GuardForm = () => {
     setValue,
     setError,
     clearErrors,
-  } = useForm<Guard>({
+  } = useForm<TokenGate>({
     resolver: yupResolver(schema),
   })
 
-  const helpers: Partial<Record<keyof Guard, string>> = {
+  const helpers: Partial<Record<keyof TokenGate, string>> = {
     startDateTime: 'Empty means it starts imediatelly',
     endDateTime: 'Empty means it never expires',
   }
@@ -64,9 +64,9 @@ const GuardForm = () => {
               value={value || ''}
               required
               fullWidth
-              id="guard-name"
+              id="token-gate-name"
               label="Name"
-              name="guard-name"
+              name="token-gate-name"
               autoFocus
               error={Boolean(errors.name)}
               helperText={errors.name?.message || helpers.name}
@@ -81,7 +81,7 @@ const GuardForm = () => {
               onChange={onChange}
               value={value || ''}
               fullWidth
-              id="guard-description"
+              id="token-gate-description"
               label="Description"
               name="description"
               error={Boolean(errors.description)}
@@ -95,11 +95,11 @@ const GuardForm = () => {
           name={'requirements'}
           control={control}
           render={({ field: { onChange, value } }) => {
-            const reqs: GuardRequirement[] = value || []
+            const reqs: TokenGateRequirement[] = value || []
             return (
               <>
                 {reqs.map((req) => (
-                  <GuardRequirementForm
+                  <TokenGateRequirementForm
                     key={req.contract}
                     requirement={req}
                     onDelete={(deleted) => {
@@ -112,7 +112,7 @@ const GuardForm = () => {
                     }}
                   />
                 ))}
-                <GuardRequirementForm
+                <TokenGateRequirementForm
                   existingRequirements={reqs}
                   onAdd={(req) => {
                     onChange([...reqs, req])
@@ -147,7 +147,7 @@ const GuardForm = () => {
                 renderInput={(props) => (
                   <TextField
                     fullWidth
-                    id="guard-start-date"
+                    id="token-gate-start-date"
                     name="start-date-time"
                     error={Boolean(errors.startDateTime)}
                     helperText={
@@ -171,7 +171,7 @@ const GuardForm = () => {
                 renderInput={(props) => (
                   <TextField
                     fullWidth
-                    id="guard-start-date"
+                    id="token-gate-start-date"
                     name="start-date-time"
                     error={Boolean(errors.endDateTime)}
                     helperText={
@@ -195,7 +195,7 @@ const GuardForm = () => {
             variant="contained"
             startIcon={<SaveIcon />}
           >
-            Save Guard
+            Save Token Gate
           </Button>
         </Box>
       </Box>
@@ -203,4 +203,4 @@ const GuardForm = () => {
   )
 }
 
-export default GuardForm
+export default TokenGateForm

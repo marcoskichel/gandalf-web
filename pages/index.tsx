@@ -1,6 +1,6 @@
 import Navigation from '@containers/Navigation'
 import Themed from '@containers/Themed'
-import UserGuards from '@containers/UserGuards'
+import UserTokenGates from '@containers/UserTokenGates'
 import { checkUserIsAuthorized } from '@helpers/authorization'
 import { Box } from '@mui/material'
 import type { GetServerSidePropsContext, NextPage } from 'next'
@@ -29,7 +29,7 @@ const Home: NextPage = () => {
         <Navigation title="Home" />
 
         <Box component="main">
-          <UserGuards />
+          <UserTokenGates />
         </Box>
       </Box>
     </Themed>

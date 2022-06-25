@@ -3,11 +3,11 @@ import AddIcon from '@mui/icons-material/Add'
 import { Container, Typography, Fab } from '@mui/material'
 import Link from 'next/link'
 
-const UserGuards = () => {
+const UserTokenGates = () => {
   return (
     <Container sx={{ position: 'relative' }}>
-      <Typography variant="h4">Guards</Typography>
-      <Link href={Routes.guardForm}>
+      <Typography variant="h4">Token Gates</Typography>
+      <Link href={Routes.tokenGateForm}>
         <Fab
           color="primary"
           aria-label="add"
@@ -20,4 +20,4 @@ const UserGuards = () => {
   )
 }
 
-export default UserGuards
+export default UserTokenGates
