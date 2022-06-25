@@ -1,21 +1,26 @@
-import GuardRequirementForm, {
-  guardRequirementSchema,
-} from '@components/GuardRequirementForm'
+import GuardRequirementForm from '@components/GuardRequirementForm'
+import { getDateError } from '@helpers/validations'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { Guard, GuardRequirement } from '@models/Guard'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Container, TextField, Typography } from '@mui/material'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
-import { Guard, GuardRequirement } from '@types/Guard'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { array, date, object, SchemaOf, string } from 'yup'
+import { array, date, object, SchemaOf, string, number } from 'yup'
 
 const schema: SchemaOf<Guard> = object().shape({
   name: string().required('Name is a required field'),
   description: string().optional(),
-  startDateTime: date().optional(),
+  startDateTime: date().typeError('State Date must be a date value').optional(),
   endDateTime: date().optional(),
-  requirements: array().of(guardRequirementSchema),
+  requirements: array().of(
+    object().shape({
+      chainId: string().required(),
+      contract: string().required(),
+      amount: number().required(),
+    })
+  ),
 })
 
 const GuardForm = () => {
@@ -24,6 +29,8 @@ const GuardForm = () => {
     control,
     formState: { errors },
     setValue,
+    setError,
+    clearErrors,
   } = useForm<Guard>({
     resolver: yupResolver(schema),
   })
@@ -106,6 +113,7 @@ const GuardForm = () => {
                   />
                 ))}
                 <GuardRequirementForm
+                  existingRequirements={reqs}
                   onAdd={(req) => {
                     onChange([...reqs, req])
                   }}
@@ -128,6 +136,13 @@ const GuardForm = () => {
             control={control}
             render={({ field: { onChange, value } }) => (
               <DateTimePicker
+                onAccept={() => clearErrors('startDateTime')}
+                onError={(reason) =>
+                  setError(
+                    'startDateTime',
+                    getDateError(reason as string, 'Start Date')
+                  )
+                }
                 minDateTime={now}
                 renderInput={(props) => (
                   <TextField

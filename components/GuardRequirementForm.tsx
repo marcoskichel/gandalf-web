@@ -11,19 +11,14 @@ import {
   Select,
   TextField,
 } from '@mui/material'
-import { GuardRequirement } from '@types/Guard'
+import { GuardRequirement } from 'models/Guard'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { number, object, SchemaOf, string } from 'yup'
-
-const schema: SchemaOf<GuardRequirement> = object().shape({
-  chainId: string().required('Chain is a required field'),
-  contract: string().required('Contract Address is a required field'),
-  amount: number().required('Minimum Amount is a required field'),
-})
+import { number, string, object } from 'yup'
 
 interface GuardFormProps {
   requirement?: GuardRequirement
+  existingRequirements?: GuardRequirement[]
   onDelete?: (req: GuardRequirement) => void
   onAdd?: (req: GuardRequirement) => void
 }
@@ -31,7 +26,25 @@ interface GuardFormProps {
 const onlyNumbers = /^[0-9\b]+$/
 
 const GuardRequirementForm = (props: GuardFormProps) => {
-  const { requirement, onDelete = () => {}, onAdd = () => {} } = props
+  const {
+    requirement,
+    existingRequirements = [],
+    onDelete = () => {},
+    onAdd = () => {},
+  } = props
+
+  const schema = object().shape({
+    chainId: string().required('Chain is a required field'),
+    contract: string()
+      .required('Contract Address is a required field')
+      .notOneOf(
+        existingRequirements.map((req) => req.contract),
+        'Contract Address must be unique'
+      ),
+    amount: number()
+      .typeError('Minumum Amount must be a number')
+      .required('Minimum Amount is a required field'),
+  })
 
   const {
     handleSubmit,
@@ -156,4 +169,3 @@ const GuardRequirementForm = (props: GuardFormProps) => {
 }
 
 export default GuardRequirementForm
-export { schema as guardRequirementSchema }

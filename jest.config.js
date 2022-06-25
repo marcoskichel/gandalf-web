@@ -15,7 +15,7 @@ const config = {
     "@containers/(.*)": "<rootDir>/containers/$1",
     "@contexts/(.*)": "<rootDir>/contexts/$1",
     "@helpers/(.*)": "<rootDir>/helpers/$1",
-    "@types/(.*)": "<rootDir>/types/$1"
+    "@models/(.*)": "<rootDir>/models/$1"
   },
 }
 
