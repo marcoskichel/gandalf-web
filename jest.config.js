@@ -14,7 +14,8 @@ const config = {
     "@constants/(.*)": "<rootDir>/constants/$1",
     "@containers/(.*)": "<rootDir>/containers/$1",
     "@contexts/(.*)": "<rootDir>/contexts/$1",
-    "@helpers/(.*)": "<rootDir>/helpers/$1"
+    "@helpers/(.*)": "<rootDir>/helpers/$1",
+    "@types/(.*)": "<rootDir>/types/$1"
   },
 }
 
