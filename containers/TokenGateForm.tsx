@@ -1,4 +1,5 @@
 import TokenGateRequirementForm from '@components/TokenGateRequirementForm'
+import Routes from '@constants/routes'
 import { useToaster } from '@contexts/ToasterContext'
 import { useTokenGates } from '@contexts/TokenGatesContext'
 import { getDateError } from '@helpers/validations'
@@ -7,6 +8,7 @@ import { TokenGate, TokenGateRequirement } from '@models/TokenGate'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Container, TextField, Typography } from '@mui/material'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { Controller, FieldError, useForm } from 'react-hook-form'
 import { array, date, object, SchemaOf, string, number } from 'yup'
@@ -41,6 +43,7 @@ const TokenGateForm = () => {
 
   const { addTokenGate } = useTokenGates()
   const { setToast } = useToaster()
+  const router = useRouter()
 
   const [now] = useState(new Date())
 
@@ -51,7 +54,8 @@ const TokenGateForm = () => {
 
   const onSubmit = handleSubmit(
     async (data) => {
-      return addTokenGate(data)
+      await addTokenGate(data)
+      router.push(Routes.home)
     },
     (formErrors) => {
       if (formErrors?.requirements) {
@@ -94,7 +98,7 @@ const TokenGateForm = () => {
         <Controller
           name={'description'}
           control={control}
-          defaultValue={''}
+          defaultValue={null}
           render={({ field: { onChange, value } }) => (
             <TextField
               onChange={onChange}
