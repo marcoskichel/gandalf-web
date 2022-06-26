@@ -1,5 +1,4 @@
 const getDateError = (reason: string, label = '') => {
-  console.log(reason)
   switch (reason) {
     case 'invalidDate':
       return { message: `${label} format is invalid` }

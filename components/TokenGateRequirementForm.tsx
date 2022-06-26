@@ -1,6 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import AddIcon from '@mui/icons-material/Add'
 import ClearIcon from '@mui/icons-material/Clear'
+import SaveIcon from '@mui/icons-material/Save'
 import {
   Box,
   FormControl,
@@ -86,10 +86,12 @@ const TokenGateRequirementForm = (props: Props) => {
         control={control}
         render={({ field: { onChange, value } }) => (
           <FormControl fullWidth error={Boolean(errors.chainId)}>
-            <InputLabel id="guard-requirement-chain-label">Chain</InputLabel>
+            <InputLabel id="token-gate-requirement-chain-label">
+              Chain
+            </InputLabel>
             <Select
-              labelId="guard-requirement-chain-label"
-              id="guard-requirement-chain"
+              labelId="token-gate-requirement-chain-label"
+              id="token-gate-requirement-chain"
               value={value || ''}
               label="Chain"
               onChange={onChange}
@@ -111,9 +113,9 @@ const TokenGateRequirementForm = (props: Props) => {
             value={value || ''}
             required
             fullWidth
-            id="guard-requirement-contract-label"
+            id="token-gate-requirement-contract-label"
             label="Contract Address"
-            name="guard-requirement-contract"
+            name="token-gate-requirement-contract"
             disabled={Boolean(requirement)}
             error={Boolean(errors.contract)}
             helperText={errors.contract?.message}
@@ -136,9 +138,9 @@ const TokenGateRequirementForm = (props: Props) => {
             value={value || ''}
             required
             fullWidth
-            id="guard-requirement-amount"
+            id="token-gate-requirement-amount"
             label="Minimum Amount"
-            name="guard-requirement-amount"
+            name="token-gate-requirement-amount"
             disabled={Boolean(requirement)}
             error={Boolean(errors.amount)}
             helperText={errors.amount?.message}
@@ -161,7 +163,7 @@ const TokenGateRequirementForm = (props: Props) => {
           sx={{ width: 45, height: 45, mt: 1 }}
           onClick={onSubmit}
         >
-          <AddIcon />
+          <SaveIcon />
         </IconButton>
       )}
     </Box>

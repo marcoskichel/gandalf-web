@@ -1,4 +1,6 @@
 import TokenGateRequirementForm from '@components/TokenGateRequirementForm'
+import { useToaster } from '@contexts/ToasterContext'
+import { useTokenGates } from '@contexts/TokenGatesContext'
 import { getDateError } from '@helpers/validations'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { TokenGate, TokenGateRequirement } from '@models/TokenGate'
@@ -6,21 +8,23 @@ import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, Container, TextField, Typography } from '@mui/material'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, FieldError, useForm } from 'react-hook-form'
 import { array, date, object, SchemaOf, string, number } from 'yup'
 
 const schema: SchemaOf<TokenGate> = object().shape({
   name: string().required('Name is a required field'),
-  description: string().optional(),
-  startDateTime: date().typeError('State Date must be a date value').optional(),
-  endDateTime: date().optional(),
-  requirements: array().of(
-    object().shape({
-      chainId: string().required(),
-      contract: string().required(),
-      amount: number().required(),
-    })
-  ),
+  description: string().nullable(),
+  startDateTime: date().nullable(),
+  endDateTime: date().nullable(),
+  requirements: array()
+    .required('Atleast one requirement is required')
+    .of(
+      object().shape({
+        chainId: string().required(),
+        contract: string().required(),
+        amount: number().required(),
+      })
+    ),
 })
 
 const TokenGateForm = () => {
@@ -35,16 +39,30 @@ const TokenGateForm = () => {
     resolver: yupResolver(schema),
   })
 
+  const { addTokenGate } = useTokenGates()
+  const { setToast } = useToaster()
+
+  const [now] = useState(new Date())
+
   const helpers: Partial<Record<keyof TokenGate, string>> = {
     startDateTime: 'Empty means it starts imediatelly',
     endDateTime: 'Empty means it never expires',
   }
 
-  const onSubmit = handleSubmit(async (data) => {
-    console.log(data)
-  })
-
-  const [now] = useState(new Date())
+  const onSubmit = handleSubmit(
+    async (data) => {
+      return addTokenGate(data)
+    },
+    (formErrors) => {
+      if (formErrors?.requirements) {
+        const error = formErrors.requirements as unknown as FieldError
+        setToast({
+          message: error.message as string,
+          severity: 'error',
+        })
+      }
+    }
+  )
 
   return (
     <Container>
@@ -76,6 +94,7 @@ const TokenGateForm = () => {
         <Controller
           name={'description'}
           control={control}
+          defaultValue={''}
           render={({ field: { onChange, value } }) => (
             <TextField
               onChange={onChange}
@@ -134,6 +153,7 @@ const TokenGateForm = () => {
           <Controller
             name={'startDateTime'}
             control={control}
+            defaultValue={null}
             render={({ field: { onChange, value } }) => (
               <DateTimePicker
                 onAccept={() => clearErrors('startDateTime')}
@@ -165,9 +185,17 @@ const TokenGateForm = () => {
           <Controller
             name={'endDateTime'}
             control={control}
+            defaultValue={null}
             render={({ field: { onChange, value } }) => (
               <DateTimePicker
                 minDateTime={now}
+                onAccept={() => clearErrors('endDateTime')}
+                onError={(reason) =>
+                  setError(
+                    'endDateTime',
+                    getDateError(reason as string, 'End Date')
+                  )
+                }
                 renderInput={(props) => (
                   <TextField
                     fullWidth
