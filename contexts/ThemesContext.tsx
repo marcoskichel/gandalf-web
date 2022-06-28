@@ -36,6 +36,9 @@ const lightTheme = createTheme({
 })
 
 const darkTheme = createTheme({
+  shape: {
+    borderRadius: '8px',
+  },
   palette: {
     mode: 'dark',
     background: {

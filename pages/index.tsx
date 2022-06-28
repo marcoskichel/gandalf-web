@@ -1,6 +1,7 @@
 import Navigation from '@containers/Navigation'
 import Themed from '@containers/Themed'
 import UserTokenGates from '@containers/UserTokenGates'
+import { TokenGatesContextProvider } from '@contexts/TokenGatesContext'
 import { checkUserIsAuthorized } from '@helpers/authorization'
 import { Box } from '@mui/material'
 import type { GetServerSidePropsContext, NextPage } from 'next'
@@ -15,24 +16,26 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
 const Home: NextPage = () => {
   return (
-    <Themed>
-      <Box>
-        <Head>
-          <title>Gandalf</title>
-          <meta
-            name="description"
-            content="The home page of the gandalf website"
-          />
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
+    <TokenGatesContextProvider>
+      <Themed>
+        <Box>
+          <Head>
+            <title>Gandalf</title>
+            <meta
+              name="description"
+              content="The home page of the gandalf website"
+            />
+            <link rel="icon" href="/favicon.ico" />
+          </Head>
 
-        <Navigation title="Home" />
+          <Navigation title="Home" />
 
-        <Box component="main">
-          <UserTokenGates />
+          <Box component="main">
+            <UserTokenGates />
+          </Box>
         </Box>
-      </Box>
-    </Themed>
+      </Themed>
+    </TokenGatesContextProvider>
   )
 }
 

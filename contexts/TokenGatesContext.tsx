@@ -11,6 +11,7 @@ import {
   getDoc,
   getDocs,
   query,
+  QueryConstraint,
   QuerySnapshot,
   setDoc,
   where,
@@ -19,7 +20,9 @@ import { createContext, ReactNode, useCallback, useContext } from 'react'
 
 interface ContextProps {
   findTokenGate: (id: string) => Promise<DocumentSnapshot<OwnedTokenGate>>
-  fetchTokenGates: () => Promise<QuerySnapshot<OwnedTokenGate>>
+  fetchTokenGates: (
+    ...extraConstraints: QueryConstraint[]
+  ) => Promise<QuerySnapshot<OwnedTokenGate>>
   addTokenGate: (data: TokenGate) => Promise<DocumentReference<OwnedTokenGate>>
   updateTokenGate: (id: string, data: TokenGate) => Promise<void>
   removeTokenGate: (id: string) => Promise<void>
@@ -44,15 +47,19 @@ const TokenGatesContextProvider = (props: ProviderProps) => {
     []
   )
 
-  const fetchTokenGates = useCallback(async (): Promise<
-    QuerySnapshot<OwnedTokenGate>
-  > => {
-    const q = query(
-      AppCollections.tokenGates,
-      where('ownerId', '==', user?.uid)
-    )
-    return getDocs<OwnedTokenGate>(q)
-  }, [user?.uid])
+  const fetchTokenGates = useCallback(
+    async (
+      ...extraConstraints: QueryConstraint[]
+    ): Promise<QuerySnapshot<OwnedTokenGate>> => {
+      const q = query(
+        AppCollections.tokenGates,
+        where('ownerId', '==', user?.uid),
+        ...extraConstraints
+      )
+      return getDocs<OwnedTokenGate>(q)
+    },
+    [user?.uid]
+  )
 
   const addTokenGate = useCallback(
     (data: TokenGate): Promise<DocumentReference<OwnedTokenGate>> => {
