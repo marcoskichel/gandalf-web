@@ -1,4 +1,5 @@
 import { AuthContextProvider } from '@contexts/AuthContext'
+import { GlobalLoadingContextProvider } from '@contexts/GlobalLoadingContext'
 import { ThemesContextProvider } from '@contexts/ThemesContext'
 import '@fontsource/roboto/300.css'
 import '@fontsource/roboto/400.css'
@@ -13,7 +14,9 @@ function MyApp({ Component, pageProps }: AppProps) {
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <ThemesContextProvider>
         <AuthContextProvider>
-          <Component {...pageProps} />
+          <GlobalLoadingContextProvider>
+            <Component {...pageProps} />
+          </GlobalLoadingContextProvider>
         </AuthContextProvider>
       </ThemesContextProvider>
     </LocalizationProvider>

@@ -1,5 +1,6 @@
 import Routes from '@constants/routes'
 import { useAuth } from '@contexts/AuthContext'
+import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ExitIcon from '@mui/icons-material/ExitToApp'
 import SettingsIcon from '@mui/icons-material/Settings'
@@ -10,9 +11,11 @@ import {
   Typography,
   styled,
   IconButton,
+  LinearProgress,
 } from '@mui/material'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useEffect } from 'react'
 
 interface Link {
   label: string
@@ -20,6 +23,7 @@ interface Link {
 }
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
+  position: 'relative',
   alignItems: 'flex-start',
   paddingTop: theme.spacing(1),
   paddingBottom: theme.spacing(2),
@@ -27,6 +31,11 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   '@media all': {
     minHeight: 128,
   },
+}))
+
+const StyledLinearProgress = styled(LinearProgress)(() => ({
+  width: '100%',
+  bottom: 0,
 }))
 
 interface Props {
@@ -38,7 +47,30 @@ const Navigation = (props: Props) => {
   const { title, backPath } = props
 
   const { user, signOut } = useAuth()
+  const { navigationLoading, setNavigationLoading } = useGlobalLoading()
   const router = useRouter()
+
+  useEffect(() => {
+    const handleStart = (url: string) => {
+      if (url !== router.asPath) {
+        setNavigationLoading(true)
+      }
+    }
+
+    const handleComplete = () => {
+      setNavigationLoading(false)
+    }
+
+    router.events.on('routeChangeStart', handleStart)
+    router.events.on('routeChangeComplete', handleComplete)
+    router.events.on('routeChangeError', handleComplete)
+
+    return () => {
+      router.events.off('routeChangeStart', handleStart)
+      router.events.off('routeChangeComplete', handleComplete)
+      router.events.off('routeChangeError', handleComplete)
+    }
+  })
 
   const handleSignOut = async () => {
     await signOut()
@@ -88,6 +120,7 @@ const Navigation = (props: Props) => {
           </IconButton>
         )}
       </StyledToolbar>
+      {navigationLoading && <StyledLinearProgress />}
     </AppBar>
   )
 }

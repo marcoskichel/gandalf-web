@@ -1,5 +1,11 @@
 import { Theme, createTheme } from '@mui/material'
-import { createContext, useCallback, useContext, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 
 declare module '@mui/material' {
   interface Palette {
@@ -83,15 +89,16 @@ const ThemesContextProvider = (props: Props) => {
     setCurrentTheme(availableThemes[name])
   }, [])
 
+  const value = useMemo(
+    () => ({
+      currentTheme,
+      switchTheme,
+    }),
+    [currentTheme, switchTheme]
+  )
+
   return (
-    <ThemesContext.Provider
-      value={{
-        currentTheme,
-        switchTheme,
-      }}
-    >
-      {children}
-    </ThemesContext.Provider>
+    <ThemesContext.Provider value={value}>{children}</ThemesContext.Provider>
   )
 }
 

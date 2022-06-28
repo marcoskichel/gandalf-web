@@ -1,5 +1,6 @@
 import TokenGateRequirementForm from '@components/TokenGateRequirementForm'
 import Routes from '@constants/routes'
+import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
 import { useToaster } from '@contexts/ToasterContext'
 import { useTokenGates } from '@contexts/TokenGatesContext'
 import { getDateError } from '@helpers/validations'
@@ -43,6 +44,7 @@ const TokenGateForm = () => {
 
   const { addTokenGate } = useTokenGates()
   const { setToast } = useToaster()
+  const { setNavigationLoading } = useGlobalLoading()
   const router = useRouter()
 
   const [now] = useState(new Date())
@@ -54,6 +56,7 @@ const TokenGateForm = () => {
 
   const onSubmit = handleSubmit(
     async (data) => {
+      setNavigationLoading(true)
       await addTokenGate(data)
       router.push(Routes.home)
     },

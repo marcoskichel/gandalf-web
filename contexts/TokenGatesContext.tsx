@@ -16,7 +16,13 @@ import {
   setDoc,
   where,
 } from 'firebase/firestore'
-import { createContext, ReactNode, useCallback, useContext } from 'react'
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+} from 'react'
 
 interface ContextProps {
   findTokenGate: (id: string) => Promise<DocumentSnapshot<OwnedTokenGate>>
@@ -87,16 +93,25 @@ const TokenGatesContextProvider = (props: ProviderProps) => {
     return deleteDoc(ref)
   }, [])
 
+  const value = useMemo(
+    () => ({
+      findTokenGate,
+      fetchTokenGates,
+      addTokenGate,
+      updateTokenGate,
+      removeTokenGate,
+    }),
+    [
+      addTokenGate,
+      fetchTokenGates,
+      findTokenGate,
+      removeTokenGate,
+      updateTokenGate,
+    ]
+  )
+
   return (
-    <TokenGatesContext.Provider
-      value={{
-        findTokenGate,
-        fetchTokenGates,
-        addTokenGate,
-        updateTokenGate,
-        removeTokenGate,
-      }}
-    >
+    <TokenGatesContext.Provider value={value}>
       {children}
     </TokenGatesContext.Provider>
   )
