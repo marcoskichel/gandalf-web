@@ -1,3 +1,4 @@
+import Routes from '@constants/routes'
 import SignInForm from '@containers/SignInForm'
 import Themed from '@containers/Themed'
 import AuthContext from '@contexts/AuthContext'
@@ -151,7 +152,7 @@ describe('SignInForm', () => {
       const mockPush = router.push as jest.Mock
 
       await signIn()
-      expect(mockPush).toHaveBeenCalledWith('/')
+      expect(mockPush).toHaveBeenCalledWith(Routes.home)
     })
   })
 })

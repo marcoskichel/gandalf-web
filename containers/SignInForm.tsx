@@ -1,4 +1,5 @@
 import GoogleButton from '@components/GoogleButton'
+import Routes from '@constants/routes'
 import { useAuth } from '@contexts/AuthContext'
 import { useToaster } from '@contexts/ToasterContext'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -39,7 +40,7 @@ const SignInForm = () => {
   ) => {
     try {
       await delegate(data?.email as string, data?.password as string)
-      router.push('/')
+      router.push(Routes.home)
     } catch (error) {
       const fbError = error as FirebaseError
       if (
@@ -68,15 +69,11 @@ const SignInForm = () => {
     <Box
       data-testid="sign-in-form"
       sx={{
-        marginTop: 8,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
       }}
     >
-      <Typography component="h1" variant="h5">
-        Sign in
-      </Typography>
       <Box component="form" onSubmit={onSubmit} noValidate>
         <Controller
           name={'email'}

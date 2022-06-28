@@ -1,4 +1,6 @@
 import { auth } from '@config/firebase'
+import Routes from '@constants/routes'
+import { FirebaseError } from 'firebase/app'
 import {
   AuthProvider,
   GoogleAuthProvider,
@@ -46,10 +48,10 @@ const AuthContextProvider = (props: Props) => {
       if (user) {
         const token = await user.getIdToken()
         setUser(user)
-        nookies.set(undefined, 'token', token, { path: '/' })
+        nookies.set(undefined, 'token', token, { path: Routes.home })
       } else {
         setUser(null)
-        nookies.set(undefined, 'token', '', { path: '/' })
+        nookies.set(undefined, 'token', '', { path: Routes.home })
       }
     })
   }, [])
@@ -108,6 +110,11 @@ const AuthContextProvider = (props: Props) => {
       const result = await signInWithPopup(auth, provider)
       if (result.user) {
         setUser(result.user)
+      }
+    } catch (error) {
+      const fbError = error as FirebaseError
+      if (fbError.code !== 'auth/popup-closed-by-user') {
+        throw error
       }
     } finally {
       setLoading(false)

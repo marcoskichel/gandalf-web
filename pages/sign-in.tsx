@@ -1,3 +1,4 @@
+import Navigation from '@containers/Navigation'
 import SignInForm from '@containers/SignInForm'
 import Themed from '@containers/Themed'
 import Toaster from '@containers/Toaster'
@@ -20,6 +21,7 @@ const SignIn: NextPage = () => {
           <title>Gandalf</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
+        <Navigation title="Sign In" />
         <Container component="main" maxWidth="xs">
           <SignInForm />
         </Container>
