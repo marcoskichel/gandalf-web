@@ -23,7 +23,6 @@ interface Link {
 }
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
-  position: 'relative',
   alignItems: 'flex-start',
   paddingTop: theme.spacing(1),
   paddingBottom: theme.spacing(2),
@@ -33,9 +32,8 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   },
 }))
 
-const StyledLinearProgress = styled(LinearProgress)(() => ({
+const StyledLinearProgress = styled(LinearProgress)(({ theme }) => ({
   width: '100%',
-  bottom: 0,
 }))
 
 interface Props {
@@ -120,7 +118,9 @@ const Navigation = (props: Props) => {
           </IconButton>
         )}
       </StyledToolbar>
-      {navigationLoading && <StyledLinearProgress />}
+      <StyledLinearProgress
+        sx={{ visibility: navigationLoading ? 'visible' : 'hidden' }}
+      />
     </AppBar>
   )
 }
