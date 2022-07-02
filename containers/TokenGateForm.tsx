@@ -56,9 +56,13 @@ const TokenGateForm = () => {
 
   const onSubmit = handleSubmit(
     async (data) => {
-      setNavigationLoading(true)
-      await addTokenGate(data)
-      router.push(Routes.home)
+      try {
+        setNavigationLoading(true)
+        await addTokenGate(data)
+        router.push(Routes.home)
+      } finally {
+        setNavigationLoading(false)
+      }
     },
     (formErrors) => {
       if (formErrors?.requirements) {
