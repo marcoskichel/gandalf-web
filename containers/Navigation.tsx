@@ -32,7 +32,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   },
 }))
 
-const StyledLinearProgress = styled(LinearProgress)(({ theme }) => ({
+const StyledLinearProgress = styled(LinearProgress)(() => ({
   width: '100%',
 }))
 
