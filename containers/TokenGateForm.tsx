@@ -5,14 +5,25 @@ import { useToaster } from '@contexts/ToasterContext'
 import { useTokenGates } from '@contexts/TokenGatesContext'
 import { getDateError } from '@helpers/validations'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { TokenGate, TokenGateRequirement } from '@models/TokenGate'
+import {
+  OwnedTokenGate,
+  TokenGate,
+  TokenGateRequirement,
+} from '@models/TokenGate'
 import SaveIcon from '@mui/icons-material/Save'
-import { Box, Button, Container, TextField, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, FieldError, useForm } from 'react-hook-form'
-import { array, date, object, SchemaOf, string, number } from 'yup'
+import { array, date, number, object, SchemaOf, string } from 'yup'
 
 const schema: SchemaOf<TokenGate> = object().shape({
   name: string().required('Name is a required field'),
@@ -30,7 +41,13 @@ const schema: SchemaOf<TokenGate> = object().shape({
     ),
 })
 
-const TokenGateForm = () => {
+interface Props {
+  id?: string
+}
+
+const TokenGateForm = (props: Props) => {
+  const { id } = props
+
   const {
     handleSubmit,
     control,
@@ -42,23 +59,43 @@ const TokenGateForm = () => {
     resolver: yupResolver(schema),
   })
 
-  const { addTokenGate } = useTokenGates()
+  const { addTokenGate, findTokenGate, updateTokenGate } = useTokenGates()
   const { setToast } = useToaster()
   const { setNavigationLoading } = useGlobalLoading()
   const router = useRouter()
 
   const [now] = useState(new Date())
+  const [loading, setLoading] = useState(true)
 
   const helpers: Partial<Record<keyof TokenGate, string>> = {
     startDateTime: 'Empty means it starts imediatelly',
     endDateTime: 'Empty means it never expires',
   }
 
+  useEffect(() => {
+    const loadTokenGate = async () => {
+      setLoading(true)
+      if (id) {
+        const doc = await findTokenGate(id)
+        if (!doc.exists()) {
+          router.push('/not-found')
+        }
+
+        const gate = doc.data() as OwnedTokenGate
+        Object.keys(gate)
+          .map((key) => key as keyof TokenGate)
+          .forEach((key) => setValue(key, gate[key] || null))
+      }
+      setLoading(false)
+    }
+    loadTokenGate()
+  }, [findTokenGate, id, router, setValue])
+
   const onSubmit = handleSubmit(
     async (data) => {
       try {
         setNavigationLoading(true)
-        await addTokenGate(data)
+        id ? await updateTokenGate(id, data) : await addTokenGate(data)
         router.push(Routes.home)
       } finally {
         setNavigationLoading(false)
@@ -74,6 +111,19 @@ const TokenGateForm = () => {
       }
     }
   )
+
+  if (loading) {
+    return (
+      <Container
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
+        <CircularProgress />
+      </Container>
+    )
+  }
 
   return (
     <Container>

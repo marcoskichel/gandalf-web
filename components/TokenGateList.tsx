@@ -5,6 +5,8 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  CircularProgress,
+  Container,
   Grid,
   PaletteColor,
   styled,
@@ -140,7 +142,16 @@ const TokenGateList = (props: Props) => {
   } = props
 
   if (loading) {
-    return <span>Loading...</span>
+    return (
+      <Container
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
+        <CircularProgress />
+      </Container>
+    )
   }
 
   return (

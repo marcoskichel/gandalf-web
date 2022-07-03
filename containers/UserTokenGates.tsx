@@ -30,7 +30,7 @@ const UserTokenGates = (props: Props) => {
   }
 
   const onItemClick = (item: QueryDocumentSnapshot<TokenGate>) => {
-    console.log(item)
+    push(`${Routes.tokenGateForm}?id=${item.id}`)
   }
 
   useEffect(() => {
