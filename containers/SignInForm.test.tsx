@@ -2,6 +2,7 @@ import Routes from '@constants/routes'
 import SignInForm from '@containers/SignInForm'
 import Themed from '@containers/Themed'
 import AuthContext from '@contexts/AuthContext'
+import { GlobalLoadingContextProvider } from '@contexts/GlobalLoadingContext'
 import { ThemesContextProvider } from '@contexts/ThemesContext'
 import ToasterContext from '@contexts/ToasterContext'
 import { fireEvent, render, screen } from '@testing-library/react'
@@ -16,11 +17,13 @@ jest.mock('next/router')
 describe('SignInForm', () => {
   it('renders', () => {
     const { asFragment } = render(
-      <ThemesContextProvider>
-        <Themed>
-          <SignInForm />
-        </Themed>
-      </ThemesContextProvider>
+      <GlobalLoadingContextProvider>
+        <ThemesContextProvider>
+          <Themed>
+            <SignInForm />
+          </Themed>
+        </ThemesContextProvider>
+      </GlobalLoadingContextProvider>
     )
     expect(asFragment()).toMatchSnapshot()
   })
@@ -28,11 +31,13 @@ describe('SignInForm', () => {
   describe('Inline validations', () => {
     it('validate email is required', async () => {
       render(
-        <ThemesContextProvider>
-          <Themed>
-            <SignInForm />
-          </Themed>
-        </ThemesContextProvider>
+        <GlobalLoadingContextProvider>
+          <ThemesContextProvider>
+            <Themed>
+              <SignInForm />
+            </Themed>
+          </ThemesContextProvider>
+        </GlobalLoadingContextProvider>
       )
       const passwordInput = screen.getByTestId('password-input')
       const btn = screen.getByText('Sign In')
@@ -48,11 +53,13 @@ describe('SignInForm', () => {
 
     it('validate email is correctly formatted', async () => {
       render(
-        <ThemesContextProvider>
-          <Themed>
-            <SignInForm />
-          </Themed>
-        </ThemesContextProvider>
+        <GlobalLoadingContextProvider>
+          <ThemesContextProvider>
+            <Themed>
+              <SignInForm />
+            </Themed>
+          </ThemesContextProvider>
+        </GlobalLoadingContextProvider>
       )
 
       const emailInput = screen.getByRole('textbox', { name: 'Email Address' })
@@ -69,11 +76,13 @@ describe('SignInForm', () => {
 
     it('validate password is required', async () => {
       render(
-        <ThemesContextProvider>
-          <Themed>
-            <SignInForm />
-          </Themed>
-        </ThemesContextProvider>
+        <GlobalLoadingContextProvider>
+          <ThemesContextProvider>
+            <Themed>
+              <SignInForm />
+            </Themed>
+          </ThemesContextProvider>
+        </GlobalLoadingContextProvider>
       )
       const emailInput = screen.getByRole('textbox', { name: 'Email Address' })
       const btn = screen.getByText('Sign In')
@@ -101,15 +110,17 @@ describe('SignInForm', () => {
 
     const signIn = async () => {
       render(
-        <AuthContext.Provider value={auth}>
-          <ToasterContext.Provider value={{ setToast }}>
-            <ThemesContextProvider>
-              <Themed>
-                <SignInForm />
-              </Themed>
-            </ThemesContextProvider>
-          </ToasterContext.Provider>
-        </AuthContext.Provider>
+        <GlobalLoadingContextProvider>
+          <AuthContext.Provider value={auth}>
+            <ToasterContext.Provider value={{ setToast }}>
+              <ThemesContextProvider>
+                <Themed>
+                  <SignInForm />
+                </Themed>
+              </ThemesContextProvider>
+            </ToasterContext.Provider>
+          </AuthContext.Provider>
+        </GlobalLoadingContextProvider>
       )
 
       const emailInput = screen.getByRole('textbox', { name: 'Email Address' })
