@@ -1,6 +1,7 @@
 import GoogleButton from '@components/GoogleButton'
 import Routes from '@constants/routes'
 import { useAuth } from '@contexts/AuthContext'
+import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
 import { useToaster } from '@contexts/ToasterContext'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Box, Button, Grid, Link, TextField, Typography } from '@mui/material'
@@ -25,6 +26,7 @@ const SignInForm = () => {
   const { signInWithEmailAndPassword, signInWithGoogleAccount } = useAuth()
   const router = useRouter()
   const { setToast } = useToaster()
+  const { setNavigationLoading } = useGlobalLoading()
 
   const {
     handleSubmit,
@@ -39,6 +41,7 @@ const SignInForm = () => {
     data?: FormData
   ) => {
     try {
+      setNavigationLoading(true)
       await delegate(data?.email as string, data?.password as string)
       router.push(Routes.home)
     } catch (error) {
@@ -54,6 +57,8 @@ const SignInForm = () => {
       } else {
         throw error
       }
+    } finally {
+      setNavigationLoading(false)
     }
   }
 

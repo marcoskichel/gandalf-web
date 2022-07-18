@@ -11,15 +11,24 @@ import {
   getDoc,
   getDocs,
   query,
+  QueryConstraint,
   QuerySnapshot,
   setDoc,
   where,
 } from 'firebase/firestore'
-import { createContext, ReactNode, useCallback, useContext } from 'react'
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+} from 'react'
 
 interface ContextProps {
   findTokenGate: (id: string) => Promise<DocumentSnapshot<OwnedTokenGate>>
-  fetchTokenGates: () => Promise<QuerySnapshot<OwnedTokenGate>>
+  fetchTokenGates: (
+    ...extraConstraints: QueryConstraint[]
+  ) => Promise<QuerySnapshot<OwnedTokenGate>>
   addTokenGate: (data: TokenGate) => Promise<DocumentReference<OwnedTokenGate>>
   updateTokenGate: (id: string, data: TokenGate) => Promise<void>
   removeTokenGate: (id: string) => Promise<void>
@@ -44,15 +53,19 @@ const TokenGatesContextProvider = (props: ProviderProps) => {
     []
   )
 
-  const fetchTokenGates = useCallback(async (): Promise<
-    QuerySnapshot<OwnedTokenGate>
-  > => {
-    const q = query(
-      AppCollections.tokenGates,
-      where('ownerId', '==', user?.uid)
-    )
-    return getDocs<OwnedTokenGate>(q)
-  }, [user?.uid])
+  const fetchTokenGates = useCallback(
+    async (
+      ...extraConstraints: QueryConstraint[]
+    ): Promise<QuerySnapshot<OwnedTokenGate>> => {
+      const q = query(
+        AppCollections.tokenGates,
+        where('ownerId', '==', user?.uid),
+        ...extraConstraints
+      )
+      return getDocs<OwnedTokenGate>(q)
+    },
+    [user?.uid]
+  )
 
   const addTokenGate = useCallback(
     (data: TokenGate): Promise<DocumentReference<OwnedTokenGate>> => {
@@ -80,16 +93,25 @@ const TokenGatesContextProvider = (props: ProviderProps) => {
     return deleteDoc(ref)
   }, [])
 
+  const value = useMemo(
+    () => ({
+      findTokenGate,
+      fetchTokenGates,
+      addTokenGate,
+      updateTokenGate,
+      removeTokenGate,
+    }),
+    [
+      addTokenGate,
+      fetchTokenGates,
+      findTokenGate,
+      removeTokenGate,
+      updateTokenGate,
+    ]
+  )
+
   return (
-    <TokenGatesContext.Provider
-      value={{
-        findTokenGate,
-        fetchTokenGates,
-        addTokenGate,
-        updateTokenGate,
-        removeTokenGate,
-      }}
-    >
+    <TokenGatesContext.Provider value={value}>
       {children}
     </TokenGatesContext.Provider>
   )

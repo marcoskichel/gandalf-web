@@ -8,7 +8,9 @@ import {
   CollectionReference,
   connectFirestoreEmulator,
   DocumentData,
+  FirestoreDataConverter,
   getFirestore,
+  Timestamp,
 } from 'firebase/firestore'
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
@@ -23,11 +25,29 @@ if (process.env.NODE_ENV === 'development') {
 auth.useDeviceLanguage()
 
 const createCollection = <T = DocumentData>(collectionName: string) => {
-  return collection(db, collectionName) as CollectionReference<T>
+  const col = collection(db, collectionName)
+  return col as CollectionReference<T>
+}
+
+const tokenGateConverter: FirestoreDataConverter<OwnedTokenGate> = {
+  toFirestore: (data) => data,
+  fromFirestore: (snapshot) => {
+    const data = snapshot.data() as OwnedTokenGate
+    const endDateTime = data.endDateTime as Timestamp | null
+    const startDateTime = data.startDateTime as Timestamp | null
+    return {
+      ...data,
+      endDateTime: endDateTime?.toDate(),
+      startDateTime: startDateTime?.toDate(),
+    }
+  },
 }
 
 const AppCollections = {
-  tokenGates: createCollection<OwnedTokenGate>('tokenGates'),
+  tokenGates:
+    createCollection<OwnedTokenGate>('tokenGates').withConverter(
+      tokenGateConverter
+    ),
 }
 
 export default app

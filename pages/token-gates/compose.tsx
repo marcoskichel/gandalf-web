@@ -9,6 +9,7 @@ import { checkUserIsAuthorized } from '@helpers/authorization'
 import { Box } from '@mui/material'
 import type { GetServerSidePropsContext, NextPage } from 'next'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const token = await checkUserIsAuthorized(ctx)
@@ -18,6 +19,9 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 }
 
 const ComposeTokenGate: NextPage = () => {
+  const router = useRouter()
+  const { id } = router.query
+
   return (
     <Themed>
       <TokenGatesContextProvider>
@@ -32,7 +36,7 @@ const ComposeTokenGate: NextPage = () => {
             <Navigation title="New Token Gate" backPath={Routes.home} />
 
             <Box component="main">
-              <TokenGateForm />
+              <TokenGateForm id={id as string} />
             </Box>
           </Box>
           <Toaster />
