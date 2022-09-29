@@ -103,9 +103,6 @@ const Navigation = (props: Props) => {
             {title}
           </Typography>
         </Box>
-        <IconButton size="large" aria-label="settings" color="inherit">
-          <SettingsIcon />
-        </IconButton>
         {user && (
           <IconButton
             onClick={handleSignOut}
