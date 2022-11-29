@@ -3,7 +3,6 @@ import { useAuth } from '@contexts/AuthContext'
 import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ExitIcon from '@mui/icons-material/ExitToApp'
-import SettingsIcon from '@mui/icons-material/Settings'
 import {
   Box,
   AppBar,
