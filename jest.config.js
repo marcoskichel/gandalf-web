@@ -9,13 +9,13 @@ const config = {
   moduleDirectories: ['node_modules', '<rootDir>/'],
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
-    "@components/(.*)": "<rootDir>/components/$1",
-    "@config/(.*)": "<rootDir>/config/$1",
-    "@constants/(.*)": "<rootDir>/constants/$1",
-    "@containers/(.*)": "<rootDir>/containers/$1",
-    "@contexts/(.*)": "<rootDir>/contexts/$1",
-    "@helpers/(.*)": "<rootDir>/helpers/$1",
-    "@models/(.*)": "<rootDir>/models/$1"
+    '@components/(.*)': '<rootDir>/components/$1',
+    '@config/(.*)': '<rootDir>/config/$1',
+    '@constants/(.*)': '<rootDir>/constants/$1',
+    '@containers/(.*)': '<rootDir>/containers/$1',
+    '@contexts/(.*)': '<rootDir>/contexts/$1',
+    '@helpers/(.*)': '<rootDir>/helpers/$1',
+    '@models/(.*)': '<rootDir>/models/$1',
   },
 }
 
@@ -27,7 +27,7 @@ module.exports = async () => {
     '/node_modules/(?!firebase/*|@firebase/*|@hookform/*)',
     ...nextJestConfig.transformIgnorePatterns.filter(
       (pattern) => pattern !== '/node_modules/'
-    )
+    ),
   ]
-  return {...nextJestConfig, transformIgnorePatterns}
+  return { ...nextJestConfig, transformIgnorePatterns }
 }

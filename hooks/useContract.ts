@@ -1,10 +1,10 @@
-import { useMemo } from "react"
+import { useMemo } from 'react'
 
-import { AddressZero } from "@ethersproject/constants"
-import { Provider } from "@ethersproject/providers"
-import { useWeb3React } from "@web3-react/core"
-import { Contract, ContractInterface, Signer } from "ethers"
-import { isAddress } from "ethers/lib/utils"
+import { AddressZero } from '@ethersproject/constants'
+import { Provider } from '@ethersproject/providers'
+import { useWeb3React } from '@web3-react/core'
+import { Contract, ContractInterface, Signer } from 'ethers'
+import { isAddress } from 'ethers/lib/utils'
 
 export function getContract<T = Contract>(
   address: string,
@@ -21,7 +21,7 @@ const useContract = <Contract = unknown>(
   const { provider } = useWeb3React()
 
   const signerOrProvider = useMemo(() => {
-    if (provider?.["getSigner"]) {
+    if (provider?.['getSigner']) {
       return provider.getSigner()
     } else {
       return provider
@@ -33,9 +33,16 @@ const useContract = <Contract = unknown>(
   }
 
   const contract = useMemo(
-    () => getContract<Contract>(address, abi, signerOrProvider),
+    () =>
+      getContract<Contract>(
+        address,
+        abi,
+        signerOrProvider as Signer | Provider
+      ),
     [address, abi, signerOrProvider]
   )
 
   return contract
 }
+
+export default useContract

@@ -1,18 +1,30 @@
-import { TokenGateRequirement } from "@models/TokenGate"
+import { TokenGateRequirement as Requirement } from '@models/TokenGate'
+import useContract from 'hooks/useContract'
 
 interface Props {
-  requiredAmount: number
-  currentAmount: number
+  requirement: Requirement
+}
+
+const abi = [
+  'function name() public view returns (string)',
+  'function totalSupply() public view returns (uint256)',
+]
+
+interface ERC721 {
+  name: string
 }
 
 const TokenGateRequirement = (props: Props) => {
-  const {requiredAmount, currentAmount} = props
+  const { requirement } = props
 
-  return <div>
-    <p>Required: {requiredAmount}</p>
-    <p>Current: {currentAmount}</p>
-  </div>
+  const contract = useContract<ERC721>(requirement.contract, abi)
+  console.log(contract.name)
 
+  return (
+    <div>
+      <p>Name: {contract.name}</p>
+    </div>
+  )
 }
 
 export default TokenGateRequirement

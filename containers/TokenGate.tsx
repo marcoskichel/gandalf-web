@@ -4,7 +4,7 @@ import { useTokenGates } from '@contexts/TokenGatesContext'
 import { Box, Button, Typography } from '@mui/material'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
-import { Web3Provider } from '@ethersproject/providers'
+import TokenGateRequirement from '@components/TokenGateRequirement'
 
 interface Props {
   // clientId: string
@@ -13,7 +13,7 @@ interface Props {
 
 const WalletButton = ({ injector }: { injector: WalletInjector }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { activate, chainId } = useWeb3React()
+  const { chainId } = useWeb3React()
 
   return (
     <Button
@@ -23,7 +23,7 @@ const WalletButton = ({ injector }: { injector: WalletInjector }) => {
       variant="text"
       sx={{ mt: 3 }}
       onClick={() => {
-        activate(injector.value)
+        // activate(injector.value)
       }}
     >
       {injector.name}
@@ -31,48 +31,34 @@ const WalletButton = ({ injector }: { injector: WalletInjector }) => {
   )
 }
 
-interface Data {
-  gate: TokenGate
-}
-
-const getRequiments = (gate: TokenGate, provider: Web3Provider) => {
-  const abi = [
-    "function name() public view returns (string)",
-    "function totalSupply() public view returns (uint256)"
-  ]
-
-  return gate.requirements.map((req) => {
-    const signer = provider.getSigner()
-  })
-}
-
 const TokenGate = (props: Props) => {
   const { gateId } = props
   const { findTokenGate } = useTokenGates()
-  const { library } = useWeb3React()
 
-  const [data, setData] = useState<Data>()
+  const [gate, setGate] = useState<TokenGate>()
 
   useEffect(() => {
     const loadTokenGate = async () => {
       const gate = await findTokenGate(gateId)
 
       if (!gate.exists()) {
+        throw new Error('TokenGate not found')
         // TODO: Redirect to not found page
       }
 
-      setData({ gate: gate.data() as TokenGate })
+      setGate(gate.data())
     }
 
     loadTokenGate()
   }, [findTokenGate, gateId])
 
-  useEffect(() => {
-    // TODO: Check if user has requirements
-  }, [data])
-
   return (
     <Box>
+      {gate &&
+        gate.requirements.map((req) => (
+          <TokenGateRequirement key={req.contract} requirement={req} />
+        ))}
+
       <Typography>Please connect your wallet</Typography>
 
       {walletInjectors.map((injector) => (
