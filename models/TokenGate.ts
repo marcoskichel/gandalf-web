@@ -8,6 +8,7 @@ export interface TokenGateRequirement {
 
 export interface TokenGate {
   name: string
+  chainId: number
   description?: string | null
   startDateTime?: Date | null
   endDateTime?: Date | null
