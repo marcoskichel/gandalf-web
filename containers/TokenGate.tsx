@@ -1,8 +1,9 @@
 import Requirement from '@components/Requirement'
+import { metamask } from '@config/connectors/metamask'
 import { network, hooks } from '@config/connectors/network'
 import { useTokenGates } from '@contexts/TokenGatesContext'
 import { TokenGate } from '@models/TokenGate'
-import { Box } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import { useEffect, useState } from 'react'
 
 const { useProvider } = hooks
@@ -51,18 +52,18 @@ const TokenGate = (props: Props) => {
           <Requirement key={req.contract} requirement={req} />
         ))}
 
-      {/* <Button
-          type="button"
-          fullWidth
-          size="large"
-          variant="text"
-          sx={{ mt: 3 }}
-          onClick={() => {
-            metamask.activate(gate?.chainId)
-          }}
-        >
-          Connect Metamask
-        </Button> */}
+      <Button
+        type="button"
+        fullWidth
+        size="large"
+        variant="text"
+        sx={{ mt: 3 }}
+        onClick={() => {
+          metamask.activate(gate?.chainId)
+        }}
+      >
+        Connect Metamask
+      </Button>
     </Box>
   )
 }
