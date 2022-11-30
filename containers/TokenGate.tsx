@@ -4,6 +4,7 @@ import { useTokenGates } from '@contexts/TokenGatesContext'
 import { Box, Button, Typography } from '@mui/material'
 import { useWeb3React } from '@web3-react/core'
 import { useEffect, useState } from 'react'
+import { Web3Provider } from '@ethersproject/providers'
 
 interface Props {
   // clientId: string
@@ -30,16 +31,37 @@ const WalletButton = ({ injector }: { injector: WalletInjector }) => {
   )
 }
 
+interface Data {
+  gate: TokenGate
+}
+
+const getRequiments = (gate: TokenGate, provider: Web3Provider) => {
+  const abi = [
+    "function name() public view returns (string)",
+    "function totalSupply() public view returns (uint256)"
+  ]
+
+  return gate.requirements.map((req) => {
+    const signer = provider.getSigner()
+  })
+}
+
 const TokenGate = (props: Props) => {
   const { gateId } = props
   const { findTokenGate } = useTokenGates()
+  const { library } = useWeb3React()
 
-  const [gate, setGate] = useState<TokenGate>()
+  const [data, setData] = useState<Data>()
 
   useEffect(() => {
     const loadTokenGate = async () => {
       const gate = await findTokenGate(gateId)
-      setGate(gate.data())
+
+      if (!gate.exists()) {
+        // TODO: Redirect to not found page
+      }
+
+      setData({ gate: gate.data() as TokenGate })
     }
 
     loadTokenGate()
@@ -47,8 +69,7 @@ const TokenGate = (props: Props) => {
 
   useEffect(() => {
     // TODO: Check if user has requirements
-    console.log(gate)
-  }, [gate])
+  }, [data])
 
   return (
     <Box>
