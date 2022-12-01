@@ -10,15 +10,18 @@ import {
 declare module '@mui/material' {
   interface Palette {
     neutral: Palette['primary']
+    default: Palette['primary']
   }
   interface PaletteOptions {
     neutral: PaletteOptions['primary']
+    default: PaletteOptions['primary']
   }
 }
 
 declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {
     neutral: true
+    default: true
   }
 }
 
@@ -38,12 +41,16 @@ const lightTheme = createTheme({
       main: '#FFF',
       contrastText: '#616161',
     },
+    default: {
+      main: '#fff',
+      contrastText: '#320b86',
+    },
   },
 })
 
 const darkTheme = createTheme({
   shape: {
-    borderRadius: '8px',
+    borderRadius: 8,
   },
   palette: {
     mode: 'dark',
@@ -58,6 +65,10 @@ const darkTheme = createTheme({
     },
     neutral: {
       main: '#424242',
+      contrastText: '#fff',
+    },
+    default: {
+      main: '#303030',
       contrastText: '#fff',
     },
   },

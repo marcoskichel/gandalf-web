@@ -15,8 +15,10 @@ import {
   Typography,
   Divider,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
+import { useToaster } from '@contexts/ToasterContext'
+import { useCheckList } from '@contexts/ChecklistContext'
 
 interface Props {
   gateId: string
@@ -28,8 +30,14 @@ interface State {
   chain?: BasicChainInformation
 }
 
+interface MetamaskError {
+  code: number
+}
+
 const Content = (props: { state: State }) => {
   const { state } = props
+
+  const { checklist } = useCheckList()
 
   if (state.loading) {
     return (
@@ -55,7 +63,11 @@ const Content = (props: { state: State }) => {
         <Typography variant="h6">{chain.name} Network</Typography>
       </Box>
       {state.gate?.requirements.map((req) => (
-        <Requirement key={req.contract} requirement={req} />
+        <Requirement
+          key={req.contract}
+          requirement={req}
+          met={checklist[req.contract]}
+        />
       ))}
     </>
   )
@@ -64,6 +76,8 @@ const Content = (props: { state: State }) => {
 const TokenGate = (props: Props) => {
   const { gateId } = props
   const { findTokenGate } = useTokenGates()
+  const { setToast } = useToaster()
+  const { setChecklist } = useCheckList()
 
   const [state, setState] = useState<State>({ loading: true })
 
@@ -86,19 +100,43 @@ const TokenGate = (props: Props) => {
       }
 
       const gate = doc.data()
+      setChecklist(
+        gate.requirements
+          .map((req) => req.contract)
+          .reduce(
+            (checklist, key) => ({ ...checklist, ...{ [key]: false } }),
+            {}
+          )
+      )
       await connectToNetwork(gate.chainId)
 
       setState({ loading: false, gate, chain: CHAINS[gate.chainId] })
     }
 
     loadTokenGate()
-  }, [findTokenGate, gateId])
+  }, [findTokenGate, gateId, setChecklist])
+
+  const connectMetamask = useCallback(async () => {
+    try {
+      await metamask.activate(state.gate?.chainId)
+    } catch (err) {
+      const error = err as MetamaskError
+      console.error(error)
+
+      if (error.code === -32002) {
+        setToast({
+          message: 'Please continue the connection in the Metamask wallet.',
+          severity: 'warning',
+        })
+      }
+    }
+  }, [setToast, state.gate?.chainId])
 
   return (
     <Card sx={{ marginTop: '8rem' }}>
       <CardHeader
         title="Halt! VIP only area ahead"
-        subheader="Please confirm token ownership by connecting your wallet."
+        subheader="Please confirm the following tokens ownership by connecting your wallet(s)."
       />
       <Divider />
       <CardContent>
@@ -106,14 +144,21 @@ const TokenGate = (props: Props) => {
       </CardContent>
       <CardActions>
         <Button
+          color="default"
+          startIcon={
+            <Image
+              src="/icons/metamask.svg"
+              alt="Metamask"
+              width={30}
+              height={30}
+            />
+          }
           type="button"
           fullWidth
           size="large"
-          variant="text"
+          variant="contained"
           sx={{ mt: 3 }}
-          onClick={() => {
-            metamask.activate(state.gate?.chainId)
-          }}
+          onClick={connectMetamask}
         >
           Connect Metamask
         </Button>

@@ -1,6 +1,7 @@
 import Themed from '@containers/Themed'
 import Toaster from '@containers/Toaster'
 import TokenGate from '@containers/TokenGate'
+import { CheckListContextProvider } from '@contexts/ChecklistContext'
 import { ToasterContextProvider } from '@contexts/ToasterContext'
 import { TokenGatesContextProvider } from '@contexts/TokenGatesContext'
 import { Container } from '@mui/material'
@@ -17,7 +18,9 @@ const Authorization: NextPage = () => {
         </Head>
         <Container component="main" maxWidth="xs">
           <TokenGatesContextProvider>
-            <TokenGate gateId="s8oomR9x2JDC4nohNxD3" />
+            <CheckListContextProvider>
+              <TokenGate gateId="s8oomR9x2JDC4nohNxD3" />
+            </CheckListContextProvider>
           </TokenGatesContextProvider>
         </Container>
         <Toaster />
