@@ -1,22 +1,71 @@
 import Requirement from '@components/Requirement'
+import { BasicChainInformation, CHAINS } from '@config/chains'
 import { metamask } from '@config/connectors/metamask'
-import { network, hooks } from '@config/connectors/network'
+import { network } from '@config/connectors/network'
 import { useTokenGates } from '@contexts/TokenGatesContext'
 import { TokenGate } from '@models/TokenGate'
-import { Box, Button } from '@mui/material'
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+  Typography,
+  Divider,
+} from '@mui/material'
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 
-const { useProvider } = hooks
 interface Props {
   gateId: string
+}
+
+interface State {
+  loading: boolean
+  gate?: TokenGate
+  chain?: BasicChainInformation
+}
+
+const Content = (props: { state: State }) => {
+  const { state } = props
+
+  if (state.loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  const chain = state.chain as BasicChainInformation
+
+  return (
+    <>
+      <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+        {chain?.icon && (
+          <Image src={chain.icon} alt={chain.name} width={30} height={30} />
+        )}
+        <Typography variant="h6">{chain.name} Network</Typography>
+      </Box>
+      {state.gate?.requirements.map((req) => (
+        <Requirement key={req.contract} requirement={req} />
+      ))}
+    </>
+  )
 }
 
 const TokenGate = (props: Props) => {
   const { gateId } = props
   const { findTokenGate } = useTokenGates()
 
-  const [gate, setGate] = useState<TokenGate>()
-  const provider = useProvider()
+  const [state, setState] = useState<State>({ loading: true })
 
   useEffect(() => {
     const connectToNetwork = async (chainId: number) => {
@@ -29,42 +78,47 @@ const TokenGate = (props: Props) => {
     }
 
     const loadTokenGate = async () => {
-      const gate = await findTokenGate(gateId)
+      const doc = await findTokenGate(gateId)
 
-      if (!gate.exists()) {
+      if (!doc.exists()) {
         throw new Error('TokenGate not found')
         // TODO: Redirect to not found page
       }
 
-      const data = gate.data()
-      await connectToNetwork(data.chainId)
+      const gate = doc.data()
+      await connectToNetwork(gate.chainId)
 
-      setGate(gate.data())
+      setState({ loading: false, gate, chain: CHAINS[gate.chainId] })
     }
 
     loadTokenGate()
   }, [findTokenGate, gateId])
 
   return (
-    <Box sx={{ paddingTop: '8rem' }}>
-      {provider &&
-        gate?.requirements.map((req) => (
-          <Requirement key={req.contract} requirement={req} />
-        ))}
-
-      <Button
-        type="button"
-        fullWidth
-        size="large"
-        variant="text"
-        sx={{ mt: 3 }}
-        onClick={() => {
-          metamask.activate(gate?.chainId)
-        }}
-      >
-        Connect Metamask
-      </Button>
-    </Box>
+    <Card sx={{ marginTop: '8rem' }}>
+      <CardHeader
+        title="Halt! VIP only area ahead"
+        subheader="Please confirm token ownership by connecting your wallet."
+      />
+      <Divider />
+      <CardContent>
+        <Content state={state} />
+      </CardContent>
+      <CardActions>
+        <Button
+          type="button"
+          fullWidth
+          size="large"
+          variant="text"
+          sx={{ mt: 3 }}
+          onClick={() => {
+            metamask.activate(state.gate?.chainId)
+          }}
+        >
+          Connect Metamask
+        </Button>
+      </CardActions>
+    </Card>
   )
 }
 

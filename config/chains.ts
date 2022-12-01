@@ -18,12 +18,13 @@ const CELO: AddEthereumChainParameter['nativeCurrency'] = {
   decimals: 18,
 }
 
-interface BasicChainInformation {
+export interface BasicChainInformation {
   urls: string[]
   name: string
+  icon?: string
 }
 
-interface ExtendedChainInformation extends BasicChainInformation {
+export interface ExtendedChainInformation extends BasicChainInformation {
   nativeCurrency: AddEthereumChainParameter['nativeCurrency']
   blockExplorerUrls: AddEthereumChainParameter['blockExplorerUrls']
 }
@@ -64,7 +65,7 @@ export const CHAINS: {
         : '',
       'https://cloudflare-eth.com',
     ].filter((url) => url !== ''),
-    name: 'Mainnet',
+    name: ' ETH Mainnet',
   },
   3: {
     urls: [
@@ -153,6 +154,7 @@ export const CHAINS: {
       'https://polygon-rpc.com',
     ].filter((url) => url !== ''),
     name: 'Polygon Mainnet',
+    icon: '/icons/polygon.svg',
     nativeCurrency: MATIC,
     blockExplorerUrls: ['https://polygonscan.com'],
   },
@@ -163,6 +165,7 @@ export const CHAINS: {
         : '',
     ].filter((url) => url !== ''),
     name: 'Polygon Mumbai',
+    icon: '/icons/polygon.svg',
     nativeCurrency: MATIC,
     blockExplorerUrls: ['https://mumbai.polygonscan.com'],
   },
