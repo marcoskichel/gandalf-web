@@ -88,7 +88,8 @@ const TokenGate = (props: Props) => {
     allMet: false,
   })
 
-  // Initial data loading
+  // Loads the token gate from the firestore database
+  // and connects to the gate chain
   useEffect(() => {
     const connectToNetwork = async (chainId: number) => {
       try {
@@ -97,22 +98,6 @@ const TokenGate = (props: Props) => {
         // TODO: Handle connection errors
         console.error(err)
       }
-    }
-
-    const decorateRequirements = async (gate: TokenGate) => {
-      if (networkProvider) {
-        return Promise.all(
-          gate.requirements.map(async (req) => {
-            const contract = await getContract<Contract>(
-              req.contractAddress,
-              ERC721Abi,
-              networkProvider
-            )
-            return { ...req, contract, met: false }
-          })
-        )
-      }
-      return undefined
     }
 
     const loadTokenGate = async () => {
@@ -126,23 +111,44 @@ const TokenGate = (props: Props) => {
       const gate = doc.data()
       await connectToNetwork(gate.chainId)
 
-      const requirements = await decorateRequirements(gate)
-
       setState((prev) => ({
         ...prev,
         ...{
-          loading: false,
           gate,
           chain: CHAINS[gate.chainId],
-          requirements,
         },
       }))
     }
 
     loadTokenGate()
-  }, [findTokenGate, gateId, networkProvider])
+  }, [findTokenGate, gateId])
 
-  // Update requirements when a wallet is connected
+  // Decorates the gate requirements with data
+  // from the blockchain and sets loading to false
+  useEffect(() => {
+    const decorateRequirements = async (gate: TokenGate) => {
+      if (networkProvider) {
+        const requirements = await Promise.all(
+          gate.requirements.map(async (req) => {
+            const contract = await getContract<Contract>(
+              req.contractAddress,
+              ERC721Abi,
+              networkProvider
+            )
+            const contractName = await contract.name()
+            return { ...req, contract, contractName, met: false }
+          })
+        )
+        setState((prev) => ({ ...prev, ...{ requirements, loading: false } }))
+      }
+    }
+
+    if (state.gate) {
+      decorateRequirements(state.gate)
+    }
+  }, [networkProvider, state.gate])
+
+  // Check whether requirements were met after a new wallet is connected
   useEffect(() => {
     const checkRequirements = async () => {
       if (metamaskAccount && !state.loading && state.requirements) {

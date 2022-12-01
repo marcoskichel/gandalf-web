@@ -38,7 +38,7 @@ const TokenGateRequirementForm = (props: Props) => {
     contract: string()
       .required('Contract Address is a required field')
       .notOneOf(
-        existingRequirements.map((req) => req.contractId),
+        existingRequirements.map((req) => req.contractAddress),
         'Contract Address must be unique'
       ),
     amount: number()
@@ -105,7 +105,7 @@ const TokenGateRequirementForm = (props: Props) => {
         )}
       />
       <Controller
-        name={'contract'}
+        name={'contractAddress'}
         control={control}
         render={({ field: { onChange, value } }) => (
           <TextField
@@ -117,8 +117,8 @@ const TokenGateRequirementForm = (props: Props) => {
             label="Contract Address"
             name="token-gate-requirement-contract"
             disabled={Boolean(requirement)}
-            error={Boolean(errors.contractId)}
-            helperText={errors.contractId?.message}
+            error={Boolean(errors.contractAddress)}
+            helperText={errors.contractAddress?.message}
           />
         )}
       />

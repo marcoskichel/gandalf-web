@@ -9,6 +9,7 @@ export interface TokenGateRequirement {
 
 export type DecoratedTokenGateRequirement = TokenGateRequirement & {
   contract: Contract
+  contractName: string
   met: boolean
 }
 
