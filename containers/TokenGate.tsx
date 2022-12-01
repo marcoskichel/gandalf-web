@@ -1,9 +1,13 @@
 import Requirement from '@components/Requirement'
 import { BasicChainInformation, CHAINS } from '@config/chains'
-import { metamask } from '@config/connectors/metamask'
-import { network } from '@config/connectors/network'
+import { hooks as metamaskHooks, metamask } from '@config/connectors/metamask'
+import { hooks as networkHooks, network } from '@config/connectors/network'
+import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
+import { useToaster } from '@contexts/ToasterContext'
 import { useTokenGates } from '@contexts/TokenGatesContext'
-import { TokenGate } from '@models/TokenGate'
+import { ERC721Abi } from '@models/ERC721'
+import { MetamaskError } from '@models/Errors.'
+import { DecoratedTokenGateRequirement, TokenGate } from '@models/TokenGate'
 import {
   Box,
   Button,
@@ -12,13 +16,16 @@ import {
   CardContent,
   CardHeader,
   CircularProgress,
-  Typography,
   Divider,
+  Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
+import { BigNumber, Contract } from 'ethers'
+import { getContract } from 'hooks/useContract'
 import Image from 'next/image'
-import { useToaster } from '@contexts/ToasterContext'
-import { useCheckList } from '@contexts/ChecklistContext'
+import { useCallback, useEffect, useState } from 'react'
+
+const { useProvider: useNetworkProvider } = networkHooks
+const { useAccount: useMetamaskAccount } = metamaskHooks
 
 interface Props {
   gateId: string
@@ -27,17 +34,13 @@ interface Props {
 interface State {
   loading: boolean
   gate?: TokenGate
+  requirements?: DecoratedTokenGateRequirement[]
   chain?: BasicChainInformation
-}
-
-interface MetamaskError {
-  code: number
+  allMet: boolean
 }
 
 const Content = (props: { state: State }) => {
   const { state } = props
-
-  const { checklist } = useCheckList()
 
   if (state.loading) {
     return (
@@ -62,12 +65,9 @@ const Content = (props: { state: State }) => {
         )}
         <Typography variant="h6">{chain.name} Network</Typography>
       </Box>
-      {state.gate?.requirements.map((req) => (
-        <Requirement
-          key={req.contract}
-          requirement={req}
-          met={checklist[req.contract]}
-        />
+
+      {state.requirements?.map((req) => (
+        <Requirement key={req.contractAddress} requirement={req} />
       ))}
     </>
   )
@@ -75,12 +75,20 @@ const Content = (props: { state: State }) => {
 
 const TokenGate = (props: Props) => {
   const { gateId } = props
+
+  const networkProvider = useNetworkProvider()
+  const metamaskAccount = useMetamaskAccount()
+
   const { findTokenGate } = useTokenGates()
   const { setToast } = useToaster()
-  const { setChecklist } = useCheckList()
+  const { setNavigationLoading } = useGlobalLoading()
 
-  const [state, setState] = useState<State>({ loading: true })
+  const [state, setState] = useState<State>({
+    loading: true,
+    allMet: false,
+  })
 
+  // Initial data loading
   useEffect(() => {
     const connectToNetwork = async (chainId: number) => {
       try {
@@ -89,6 +97,22 @@ const TokenGate = (props: Props) => {
         // TODO: Handle connection errors
         console.error(err)
       }
+    }
+
+    const decorateRequirements = async (gate: TokenGate) => {
+      if (networkProvider) {
+        return Promise.all(
+          gate.requirements.map(async (req) => {
+            const contract = await getContract<Contract>(
+              req.contractAddress,
+              ERC721Abi,
+              networkProvider
+            )
+            return { ...req, contract, met: false }
+          })
+        )
+      }
+      return undefined
     }
 
     const loadTokenGate = async () => {
@@ -100,42 +124,81 @@ const TokenGate = (props: Props) => {
       }
 
       const gate = doc.data()
-      setChecklist(
-        gate.requirements
-          .map((req) => req.contract)
-          .reduce(
-            (checklist, key) => ({ ...checklist, ...{ [key]: false } }),
-            {}
-          )
-      )
       await connectToNetwork(gate.chainId)
 
-      setState({ loading: false, gate, chain: CHAINS[gate.chainId] })
+      const requirements = await decorateRequirements(gate)
+
+      setState((prev) => ({
+        ...prev,
+        ...{
+          loading: false,
+          gate,
+          chain: CHAINS[gate.chainId],
+          requirements,
+        },
+      }))
     }
 
     loadTokenGate()
-  }, [findTokenGate, gateId, setChecklist])
+  }, [findTokenGate, gateId, networkProvider])
 
-  const connectMetamask = useCallback(async () => {
-    try {
-      await metamask.activate(state.gate?.chainId)
-    } catch (err) {
-      const error = err as MetamaskError
-      console.error(error)
+  // Update requirements when a wallet is connected
+  useEffect(() => {
+    const checkRequirements = async () => {
+      if (metamaskAccount && !state.loading && state.requirements) {
+        let requirementsChanged = false
+        const updatedRequirements = await Promise.all(
+          state.requirements?.map(async (req) => {
+            const { contract } = req
+            const balance = await contract.balanceOf(metamaskAccount)
+            const met = balance.gte(BigNumber.from(req.amount))
 
-      if (error.code === -32002) {
-        setToast({
-          message: 'Please continue the connection in the Metamask wallet.',
-          severity: 'warning',
-        })
+            if (met !== req.met) {
+              requirementsChanged = true
+              return { ...req, met }
+            }
+            return req
+          })
+        )
+
+        if (requirementsChanged) {
+          const allMet = updatedRequirements.every((req) => req.met)
+          setState((prev) => ({
+            ...prev,
+            ...{ requirements: updatedRequirements, allMet },
+          }))
+        }
+        setNavigationLoading(false)
       }
     }
-  }, [setToast, state.gate?.chainId])
+
+    checkRequirements()
+  }, [metamaskAccount, setNavigationLoading, state.loading, state.requirements])
+
+  const connectMetamask = useCallback(async () => {
+    if (!metamaskAccount) {
+      try {
+        setNavigationLoading(true)
+        await metamask.activate(state.gate?.chainId)
+      } catch (err) {
+        setNavigationLoading(false)
+        const error = err as MetamaskError
+        console.error(error)
+
+        if (error.code === -32002) {
+          setToast({
+            message: 'Please continue the connection in the Metamask wallet.',
+            severity: 'warning',
+          })
+        }
+      }
+    }
+  }, [metamaskAccount, setNavigationLoading, setToast, state.gate?.chainId])
 
   return (
-    <Card sx={{ marginTop: '8rem' }}>
+    <Card>
       <CardHeader
-        title="Halt! VIP only area ahead"
+        title="VIP only area ahead"
         subheader="Please confirm the following tokens ownership by connecting your wallet(s)."
       />
       <Divider />

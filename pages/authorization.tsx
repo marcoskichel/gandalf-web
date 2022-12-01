@@ -1,3 +1,4 @@
+import Navigation from '@containers/Navigation'
 import Themed from '@containers/Themed'
 import Toaster from '@containers/Toaster'
 import TokenGate from '@containers/TokenGate'
@@ -16,6 +17,7 @@ const Authorization: NextPage = () => {
           <title>Gandalf</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
+        <Navigation title="Halt!" />
         <Container component="main" maxWidth="xs">
           <TokenGatesContextProvider>
             <CheckListContextProvider>

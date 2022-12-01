@@ -1,9 +1,15 @@
 import { Owned } from '@models/Owned'
+import { Contract } from 'ethers'
 
 export interface TokenGateRequirement {
   chainId: string
-  contract: string
+  contractAddress: string
   amount: number
+}
+
+export type DecoratedTokenGateRequirement = TokenGateRequirement & {
+  contract: Contract
+  met: boolean
 }
 
 export interface TokenGate {

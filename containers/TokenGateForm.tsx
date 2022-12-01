@@ -180,13 +180,13 @@ const TokenGateForm = (props: Props) => {
               <>
                 {reqs.map((req) => (
                   <TokenGateRequirementForm
-                    key={req.contract}
+                    key={req.contractId}
                     requirement={req}
                     onDelete={(deleted) => {
                       setValue(
                         'requirements',
                         value.filter(
-                          (item) => item.contract !== deleted.contract
+                          (item) => item.contractId !== deleted.contractId
                         )
                       )
                     }}
