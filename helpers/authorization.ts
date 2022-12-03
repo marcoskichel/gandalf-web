@@ -10,7 +10,7 @@ const checkUserIsAuthorized = async (ctx: GetServerSidePropsContext) => {
 
     return token
   } catch (err) {
-    console.error(err)
+    // console.error(err)
     ctx.res.writeHead(302, { Location: Routes.signIn })
     ctx.res.end()
     return null

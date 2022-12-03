@@ -5,6 +5,7 @@ import { hooks as networkHooks, network } from '@config/connectors/network'
 import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
 import { useToaster } from '@contexts/ToasterContext'
 import { useTokenGates } from '@contexts/TokenGatesContext'
+import getContract from '@helpers/getContract'
 import { ERC721Abi } from '@models/ERC721'
 import { MetamaskError } from '@models/Errors.'
 import { DecoratedTokenGateRequirement, TokenGate } from '@models/TokenGate'
@@ -20,9 +21,9 @@ import {
   Typography,
 } from '@mui/material'
 import { BigNumber, Contract } from 'ethers'
-import { getContract } from 'hooks/useContract'
 import Image from 'next/image'
 import { useCallback, useEffect, useState } from 'react'
+import useFetch from 'react-fetch-hook'
 
 const { useProvider: useNetworkProvider } = networkHooks
 const { useAccount: useMetamaskAccount } = metamaskHooks
@@ -87,6 +88,18 @@ const TokenGate = (props: Props) => {
     loading: true,
     allMet: false,
   })
+
+  const { data } = useFetch(`/api/check-requirements`, {
+    method: 'POST',
+    body: JSON.stringify({
+      account: metamaskAccount,
+      chainId: state.gate?.chainId,
+      requirements: state.gate?.requirements,
+    }),
+    depends: [!!state.gate, !!metamaskAccount],
+  })
+
+  console.log(data)
 
   // Loads the token gate from the firestore database
   // and connects to the gate chain

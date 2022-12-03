@@ -1,10 +1,11 @@
 import { Owned } from '@models/Owned'
+import { SupportedContractInterface } from 'enums/SupportedContractInterfaces'
 import { Contract } from 'ethers'
 
 export interface TokenGateRequirement {
-  chainId: string
   contractAddress: string
   amount: number
+  contractInterface: SupportedContractInterface
 }
 
 export type DecoratedTokenGateRequirement = TokenGateRequirement & {
