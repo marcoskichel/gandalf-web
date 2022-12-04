@@ -8,10 +8,11 @@ export interface TokenGateRequirement {
   contractInterface: SupportedContractInterface
 }
 
-export type DecoratedTokenGateRequirement = TokenGateRequirement & {
+export type MetTokenGateRequirement = TokenGateRequirement & { met: boolean }
+
+export type LoadedTokenGateRequirement = MetTokenGateRequirement & {
   contract: Contract
   contractName: string
-  met: boolean
 }
 
 export interface TokenGate {

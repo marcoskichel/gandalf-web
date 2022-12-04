@@ -1,21 +1,21 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { TokenGateRequirement } from '@models/TokenGate'
+import {
+  MetTokenGateRequirement,
+  TokenGateRequirement,
+} from '@models/TokenGate'
 import { SupportedContractInterfaceAbis } from 'enums/SupportedContractInterfaces'
 import { BigNumber, ethers } from 'ethers'
 import { URLS } from '@config/chains'
-
-type Data = {
-  requirements: MetRequirement[]
-}
+import { setCookie } from 'nookies'
+import jwt from 'jsonwebtoken'
 
 interface Props {
+  gateId: string
   account: string
   chainId: number
   requirements: TokenGateRequirement[]
 }
-
-type MetRequirement = TokenGateRequirement & { met: boolean }
 
 const checkSingleRequirement = async (
   account: string,
@@ -33,9 +33,8 @@ const checkRequirements = async (
   account: string,
   chainId: number,
   requirements: TokenGateRequirement[]
-): Promise<MetRequirement[]> => {
+): Promise<MetTokenGateRequirement[]> => {
   const [url] = URLS[chainId]
-  console.log('URL', url)
   const provider = new ethers.providers.JsonRpcProvider(url)
   return Promise.all(
     requirements.map(async (requirement) => {
@@ -47,15 +46,32 @@ const checkRequirements = async (
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<MetTokenGateRequirement[]>
 ) {
-  console.log(req.body)
-  const { account, chainId, requirements } = JSON.parse(req.body) as Props
-  console.log(chainId)
-  const metRequirements = await checkRequirements(
-    account,
-    chainId,
-    requirements
-  )
-  res.status(200).json({ requirements: metRequirements })
+  if (req.method === 'POST') {
+    const { account, chainId, gateId, requirements } = JSON.parse(
+      req.body
+    ) as Props
+
+    const metRequirements = await checkRequirements(
+      account,
+      chainId,
+      requirements
+    )
+
+    const allMet = metRequirements.every((requirement) => requirement.met)
+    const token = jwt.sign(
+      { account, gateId, requirements: metRequirements, allMet },
+      process.env.JWT_SECRET as string,
+      { expiresIn: '1h' }
+    )
+
+    setCookie({ res }, 'token', token, {
+      httpOnly: true,
+      maxAge: 60 * 60,
+      path: '/',
+    })
+
+    res.status(200).send(metRequirements)
+  }
 }

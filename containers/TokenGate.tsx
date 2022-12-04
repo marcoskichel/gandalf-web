@@ -2,13 +2,16 @@ import Requirement from '@components/Requirement'
 import { BasicChainInformation, CHAINS } from '@config/chains'
 import { hooks as metamaskHooks, metamask } from '@config/connectors/metamask'
 import { hooks as networkHooks, network } from '@config/connectors/network'
-import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
 import { useToaster } from '@contexts/ToasterContext'
 import { useTokenGates } from '@contexts/TokenGatesContext'
 import getContract from '@helpers/getContract'
 import { ERC721Abi } from '@models/ERC721'
 import { MetamaskError } from '@models/Errors.'
-import { DecoratedTokenGateRequirement, TokenGate } from '@models/TokenGate'
+import {
+  LoadedTokenGateRequirement,
+  MetTokenGateRequirement,
+  TokenGate,
+} from '@models/TokenGate'
 import {
   Box,
   Button,
@@ -20,7 +23,7 @@ import {
   Divider,
   Typography,
 } from '@mui/material'
-import { BigNumber, Contract } from 'ethers'
+import { Contract } from 'ethers'
 import Image from 'next/image'
 import { useCallback, useEffect, useState } from 'react'
 import useFetch from 'react-fetch-hook'
@@ -35,13 +38,13 @@ interface Props {
 interface State {
   loading: boolean
   gate?: TokenGate
-  requirements?: DecoratedTokenGateRequirement[]
+  requirements?: LoadedTokenGateRequirement[]
   chain?: BasicChainInformation
   allMet: boolean
 }
 
-const Content = (props: { state: State }) => {
-  const { state } = props
+const Content = (props: { state: State; isCheckingRequirements: boolean }) => {
+  const { state, isCheckingRequirements } = props
 
   if (state.loading) {
     return (
@@ -68,7 +71,11 @@ const Content = (props: { state: State }) => {
       </Box>
 
       {state.requirements?.map((req) => (
-        <Requirement key={req.contractAddress} requirement={req} />
+        <Requirement
+          key={req.contractAddress}
+          requirement={req}
+          isLoading={isCheckingRequirements}
+        />
       ))}
     </>
   )
@@ -82,14 +89,15 @@ const TokenGate = (props: Props) => {
 
   const { findTokenGate } = useTokenGates()
   const { setToast } = useToaster()
-  const { setNavigationLoading } = useGlobalLoading()
 
   const [state, setState] = useState<State>({
     loading: true,
     allMet: false,
   })
 
-  const { data } = useFetch(`/api/check-requirements`, {
+  const { data: metRequirements, isLoading: isCheckingRequirements } = useFetch<
+    MetTokenGateRequirement[]
+  >(`/api/check-requirements`, {
     method: 'POST',
     body: JSON.stringify({
       account: metamaskAccount,
@@ -99,7 +107,22 @@ const TokenGate = (props: Props) => {
     depends: [!!state.gate, !!metamaskAccount],
   })
 
-  console.log(data)
+  // Update state with met requirements
+  useEffect(() => {
+    if (metRequirements) {
+      console.log(metRequirements)
+      const requirements = state.requirements?.map((req) => {
+        const metRequirement = metRequirements.find(
+          (item) => item.contractAddress === req.contractAddress
+        )
+        return {
+          ...req,
+          met: metRequirement?.met || false,
+        }
+      })
+      setState((state) => ({ ...state, requirements }))
+    }
+  }, [metRequirements, state.requirements])
 
   // Loads the token gate from the firestore database
   // and connects to the gate chain
@@ -161,46 +184,11 @@ const TokenGate = (props: Props) => {
     }
   }, [networkProvider, state.gate])
 
-  // Check whether requirements were met after a new wallet is connected
-  useEffect(() => {
-    const checkRequirements = async () => {
-      if (metamaskAccount && !state.loading && state.requirements) {
-        let requirementsChanged = false
-        const updatedRequirements = await Promise.all(
-          state.requirements?.map(async (req) => {
-            const { contract } = req
-            const balance = await contract.balanceOf(metamaskAccount)
-            const met = balance.gte(BigNumber.from(req.amount))
-
-            if (met !== req.met) {
-              requirementsChanged = true
-              return { ...req, met }
-            }
-            return req
-          })
-        )
-
-        if (requirementsChanged) {
-          const allMet = updatedRequirements.every((req) => req.met)
-          setState((prev) => ({
-            ...prev,
-            ...{ requirements: updatedRequirements, allMet },
-          }))
-        }
-        setNavigationLoading(false)
-      }
-    }
-
-    checkRequirements()
-  }, [metamaskAccount, setNavigationLoading, state.loading, state.requirements])
-
   const connectMetamask = useCallback(async () => {
     if (!metamaskAccount) {
       try {
-        setNavigationLoading(true)
         await metamask.activate(state.gate?.chainId)
       } catch (err) {
-        setNavigationLoading(false)
         const error = err as MetamaskError
         console.error(error)
 
@@ -212,7 +200,7 @@ const TokenGate = (props: Props) => {
         }
       }
     }
-  }, [metamaskAccount, setNavigationLoading, setToast, state.gate?.chainId])
+  }, [metamaskAccount, setToast, state.gate?.chainId])
 
   return (
     <Card>
@@ -222,7 +210,10 @@ const TokenGate = (props: Props) => {
       />
       <Divider />
       <CardContent>
-        <Content state={state} />
+        <Content
+          state={state}
+          isCheckingRequirements={isCheckingRequirements}
+        />
       </CardContent>
       <CardActions>
         <Button

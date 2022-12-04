@@ -1,13 +1,19 @@
 import { capitalizeFirstLetter } from '@helpers/text'
-import { DecoratedTokenGateRequirement } from '@models/TokenGate'
-import { Checkbox, FormControlLabel } from '@mui/material'
+import { LoadedTokenGateRequirement } from '@models/TokenGate'
+import {
+  Box,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+} from '@mui/material'
 import { toWords } from 'number-to-words'
 interface Props {
-  requirement: DecoratedTokenGateRequirement
+  requirement: LoadedTokenGateRequirement
+  isLoading: boolean
 }
 
 const Requirement = (props: Props) => {
-  const { requirement } = props
+  const { requirement, isLoading } = props
 
   const isPlural = requirement.amount > 1
   const label = `${capitalizeFirstLetter(toWords(requirement.amount))} item${
@@ -17,13 +23,28 @@ const Requirement = (props: Props) => {
   return (
     <FormControlLabel
       label={label}
+      sx={{ cursor: 'default' }}
       control={
-        <Checkbox
-          disableRipple
-          sx={{ '& .MuiSvgIcon-root': { fontSize: 28 } }}
-          checked={requirement.met}
-          inputProps={{ 'aria-label': 'controlled' }}
-        />
+        isLoading ? (
+          <Box
+            sx={{
+              height: 46,
+              width: 46,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <CircularProgress size="24px" />
+          </Box>
+        ) : (
+          <Checkbox
+            disableRipple
+            sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }, cursor: 'default' }}
+            checked={requirement.met}
+            inputProps={{ 'aria-label': 'controlled' }}
+          />
+        )
       }
     />
   )
