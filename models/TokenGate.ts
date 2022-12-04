@@ -1,18 +1,12 @@
+import { SupportedContractInterface } from '@constants/SupportedContractInterfaces'
 import { Owned } from '@models/Owned'
-import { SupportedContractInterface } from 'enums/SupportedContractInterfaces'
-import { Contract } from 'ethers'
 
 export interface TokenGateRequirement {
   contractAddress: string
   amount: number
   contractInterface: SupportedContractInterface
-}
-
-export type MetTokenGateRequirement = TokenGateRequirement & { met: boolean }
-
-export type LoadedTokenGateRequirement = MetTokenGateRequirement & {
-  contract: Contract
-  contractName: string
+  met?: boolean
+  contractName?: string
 }
 
 export interface TokenGate {
@@ -25,3 +19,9 @@ export interface TokenGate {
 }
 
 export type OwnedTokenGate = Owned<TokenGate>
+
+export interface TokenGateAuthStatus {
+  account: string
+}
+
+export type UserAuthStatus = Record<string, TokenGateAuthStatus>

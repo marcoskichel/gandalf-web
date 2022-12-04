@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import firebaseConfig from '@constants/firebaseConfig'
-import { OwnedTokenGate } from '@models/TokenGate'
+import { OwnedTokenGate, TokenGateAuthStatus } from '@models/TokenGate'
 import { getApp, getApps, initializeApp } from 'firebase/app'
 import { connectAuthEmulator, getAuth } from 'firebase/auth'
 import {
@@ -43,11 +43,26 @@ const tokenGateConverter: FirestoreDataConverter<OwnedTokenGate> = {
   },
 }
 
+const authStatusesConverter: FirestoreDataConverter<TokenGateAuthStatus> = {
+  toFirestore: (data) => data,
+  fromFirestore: (snapshot) => {
+    const data = snapshot.data() as TokenGateAuthStatus
+    const authenticatedAt = data.authenticatedAt as unknown as Timestamp
+    return {
+      ...data,
+      authenticatedAt: authenticatedAt?.toDate(),
+    }
+  },
+}
+
 const AppCollections = {
   tokenGates:
     createCollection<OwnedTokenGate>('tokenGates').withConverter(
       tokenGateConverter
     ),
+  authStatuses: createCollection<TokenGateAuthStatus>(
+    'authStatuses'
+  ).withConverter(authStatusesConverter),
 }
 
 export default app

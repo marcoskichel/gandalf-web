@@ -97,7 +97,7 @@ const TokenGate = (props: Props) => {
 
   const { data: metRequirements, isLoading: isCheckingRequirements } = useFetch<
     MetTokenGateRequirement[]
-  >(`/api/check-requirements`, {
+  >(`/api/connect-wallet`, {
     method: 'POST',
     body: JSON.stringify({
       account: metamaskAccount,
@@ -109,18 +109,26 @@ const TokenGate = (props: Props) => {
 
   // Update state with met requirements
   useEffect(() => {
-    if (metRequirements) {
-      console.log(metRequirements)
-      const requirements = state.requirements?.map((req) => {
-        const metRequirement = metRequirements.find(
+    if (metRequirements && state.requirements) {
+      const statusChanged = state.requirements?.some((req) => {
+        const metReq = metRequirements.find(
           (item) => item.contractAddress === req.contractAddress
         )
-        return {
-          ...req,
-          met: metRequirement?.met || false,
-        }
+        return req.met !== metReq?.met
       })
-      setState((state) => ({ ...state, requirements }))
+
+      if (statusChanged) {
+        const requirements = state.requirements?.map((req) => {
+          const metRequirement = metRequirements.find(
+            (item) => item.contractAddress === req.contractAddress
+          )
+          return {
+            ...req,
+            met: metRequirement?.met || false,
+          }
+        })
+        setState((state) => ({ ...state, requirements }))
+      }
     }
   }, [metRequirements, state.requirements])
 
