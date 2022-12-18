@@ -3,7 +3,6 @@ import Themed from '@containers/Themed'
 import Toaster from '@containers/Toaster'
 import TokenGate from '@containers/TokenGate'
 import { ToasterContextProvider } from '@contexts/ToasterContext'
-import { TokenGateAuthStatusContextProvider } from '@contexts/TokenGateAuthStatusContext'
 import { TokenGatesContextProvider } from '@contexts/TokenGatesContext'
 import { Container } from '@mui/material'
 import type { NextPage } from 'next'
@@ -20,9 +19,7 @@ const Authorization: NextPage = () => {
         <Navigation title="Halt!" />
         <Container component="main" maxWidth="xs">
           <TokenGatesContextProvider>
-            <TokenGateAuthStatusContextProvider>
-              <TokenGate gateId="s8oomR9x2JDC4nohNxD3" />
-            </TokenGateAuthStatusContextProvider>
+            <TokenGate />
           </TokenGatesContextProvider>
         </Container>
         <Toaster />

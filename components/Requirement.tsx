@@ -1,5 +1,5 @@
 import { capitalizeFirstLetter } from '@helpers/text'
-import { LoadedTokenGateRequirement } from '@models/TokenGate'
+import { TokenGateRequirement } from '@models/TokenGate'
 import {
   Box,
   Checkbox,
@@ -8,7 +8,7 @@ import {
 } from '@mui/material'
 import { toWords } from 'number-to-words'
 interface Props {
-  requirement: LoadedTokenGateRequirement
+  requirement: TokenGateRequirement
   isLoading: boolean
 }
 
