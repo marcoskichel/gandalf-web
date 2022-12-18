@@ -1,4 +1,3 @@
-import { SUPPORTED_CHAINS } from '@config/chains'
 import {
   SupportedContractInterface,
   SupportedContractInterfaceHelperTexts,
