@@ -1,5 +1,7 @@
 import TokenGateRequirementForm from '@components/TokenGateRequirementForm'
+import { CHAINS } from '@config/chains'
 import Routes from '@constants/routes'
+import { SupportedContractInterface } from '@constants/SupportedContractInterfaces'
 import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
 import { useToaster } from '@contexts/ToasterContext'
 import { useTokenGates } from '@contexts/TokenGatesContext'
@@ -16,6 +18,11 @@ import {
   Button,
   CircularProgress,
   Container,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
   TextField,
   Typography,
 } from '@mui/material'
@@ -23,10 +30,11 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { Controller, FieldError, useForm } from 'react-hook-form'
-import { array, date, number, object, SchemaOf, string } from 'yup'
+import { array, date, number, object, SchemaOf, string, bool, mixed } from 'yup'
 
 const schema: SchemaOf<TokenGate> = object().shape({
   name: string().required('Name is a required field'),
+  chainId: number().required('Chain is a required field'),
   description: string().nullable(),
   startDateTime: date().nullable(),
   endDateTime: date().nullable(),
@@ -34,9 +42,13 @@ const schema: SchemaOf<TokenGate> = object().shape({
     .required('Atleast one requirement is required')
     .of(
       object().shape({
-        chainId: string().required(),
-        contract: string().required(),
+        contractAddress: string().required(),
+        contractInterface: mixed()
+          .oneOf(Object.values(SupportedContractInterface))
+          .required(),
         amount: number().required(),
+        met: bool(),
+        contractName: string(),
       })
     ),
 })
@@ -170,6 +182,32 @@ const TokenGateForm = (props: Props) => {
           )}
         />
 
+        <Controller
+          name={'chainId'}
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <FormControl fullWidth error={Boolean(errors.chainId)}>
+              <InputLabel id="token-gate-chain-label">Chain</InputLabel>
+              <Select
+                labelId="token-gate-chain-label"
+                id="token-gate-chain"
+                value={value || ''}
+                label="Chain"
+                onChange={onChange}
+              >
+                {Object.entries(CHAINS).map(([id, data]) => {
+                  return (
+                    <MenuItem key={id} value={id}>
+                      {data.name}
+                    </MenuItem>
+                  )
+                })}
+              </Select>
+              <FormHelperText>{errors.chainId?.message}</FormHelperText>
+            </FormControl>
+          )}
+        />
+
         <Typography variant="h5">Requirements</Typography>
         <Controller
           name={'requirements'}
@@ -180,13 +218,14 @@ const TokenGateForm = (props: Props) => {
               <>
                 {reqs.map((req) => (
                   <TokenGateRequirementForm
-                    key={req.contractId}
+                    key={req.contractAddress}
                     requirement={req}
                     onDelete={(deleted) => {
                       setValue(
                         'requirements',
                         value.filter(
-                          (item) => item.contractId !== deleted.contractId
+                          (item) =>
+                            item.contractAddress !== deleted.contractAddress
                         )
                       )
                     }}

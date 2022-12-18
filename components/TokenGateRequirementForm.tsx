@@ -1,20 +1,11 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import ClearIcon from '@mui/icons-material/Clear'
 import SaveIcon from '@mui/icons-material/Save'
-import {
-  Box,
-  FormControl,
-  FormHelperText,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from '@mui/material'
+import { Box, IconButton, TextField } from '@mui/material'
 import { TokenGateRequirement } from 'models/TokenGate'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { number, string, object } from 'yup'
+import { number, object, string } from 'yup'
 
 interface Props {
   requirement?: TokenGateRequirement
@@ -81,29 +72,6 @@ const TokenGateRequirementForm = (props: Props) => {
         gap: 2,
       }}
     >
-      <Controller
-        name={'chainId'}
-        control={control}
-        render={({ field: { onChange, value } }) => (
-          <FormControl fullWidth error={Boolean(errors.chainId)}>
-            <InputLabel id="token-gate-requirement-chain-label">
-              Chain
-            </InputLabel>
-            <Select
-              labelId="token-gate-requirement-chain-label"
-              id="token-gate-requirement-chain"
-              value={value || ''}
-              label="Chain"
-              onChange={onChange}
-              disabled={Boolean(requirement)}
-            >
-              <MenuItem value="polygon">Polygon</MenuItem>
-              <MenuItem value="solana">Solana</MenuItem>
-            </Select>
-            <FormHelperText>{errors.chainId?.message}</FormHelperText>
-          </FormControl>
-        )}
-      />
       <Controller
         name={'contractAddress'}
         control={control}
