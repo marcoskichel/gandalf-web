@@ -11,3 +11,10 @@ export const SupportedContractInterfaceAbis: Record<
 > = {
   [SupportedContractInterface.ERC721]: ERC721Abi,
 }
+
+export const SupportedContractInterfaceHelperTexts: Record<
+  SupportedContractInterface,
+  string
+> = {
+  [SupportedContractInterface.ERC721]: '(Default for NFTs)',
+}

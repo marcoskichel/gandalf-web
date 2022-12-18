@@ -1,11 +1,25 @@
+import { SUPPORTED_CHAINS } from '@config/chains'
+import {
+  SupportedContractInterface,
+  SupportedContractInterfaceHelperTexts,
+} from '@constants/SupportedContractInterfaces'
 import { yupResolver } from '@hookform/resolvers/yup'
 import ClearIcon from '@mui/icons-material/Clear'
 import SaveIcon from '@mui/icons-material/Save'
-import { Box, IconButton, TextField } from '@mui/material'
+import {
+  Box,
+  FormControl,
+  FormHelperText,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from '@mui/material'
 import { TokenGateRequirement } from 'models/TokenGate'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { number, object, string } from 'yup'
+import { number, object, string, mixed } from 'yup'
 
 interface Props {
   requirement?: TokenGateRequirement
@@ -25,8 +39,10 @@ const TokenGateRequirementForm = (props: Props) => {
   } = props
 
   const schema = object().shape({
-    chainId: string().required('Chain is a required field'),
-    contract: string()
+    contractInterface: mixed()
+      .required('Contract Interface is a required field')
+      .oneOf(Object.values(SupportedContractInterface)),
+    contractAddress: string()
       .required('Contract Address is a required field')
       .notOneOf(
         existingRequirements.map((req) => req.contractAddress),
@@ -73,6 +89,36 @@ const TokenGateRequirementForm = (props: Props) => {
       }}
     >
       <Controller
+        name={'contractInterface'}
+        control={control}
+        render={({ field: { onChange, value } }) => (
+          <FormControl fullWidth error={Boolean(errors.contractInterface)}>
+            <InputLabel id="token-gate-requirement-contract-interface-label">
+              Contract Interface
+            </InputLabel>
+            <Select
+              labelId="token-gate-requirement-contract-interface-label"
+              id="token-gate-requirement-contract-interface"
+              value={value || ''}
+              label="Contract Interface"
+              onChange={onChange}
+            >
+              {Object.values(SupportedContractInterface).map((erc) => {
+                return (
+                  <MenuItem key={erc} value={erc}>
+                    {[
+                      erc,
+                      SupportedContractInterfaceHelperTexts[erc] || '',
+                    ].join(' ')}
+                  </MenuItem>
+                )
+              })}
+            </Select>
+            <FormHelperText>{errors.contractInterface?.message}</FormHelperText>
+          </FormControl>
+        )}
+      />
+      <Controller
         name={'contractAddress'}
         control={control}
         render={({ field: { onChange, value } }) => (
@@ -81,9 +127,9 @@ const TokenGateRequirementForm = (props: Props) => {
             value={value || ''}
             required
             fullWidth
-            id="token-gate-requirement-contract-label"
+            id="token-gate-requirement-contract-address-label"
             label="Contract Address"
-            name="token-gate-requirement-contract"
+            name="token-gate-requirement-contract-address"
             disabled={Boolean(requirement)}
             error={Boolean(errors.contractAddress)}
             helperText={errors.contractAddress?.message}

@@ -21,8 +21,6 @@ import {
   FormControl,
   FormHelperText,
   InputLabel,
-  ListItemIcon,
-  ListItemText,
   MenuItem,
   Select,
   TextField,
@@ -42,7 +40,8 @@ const schema: SchemaOf<TokenGate> = object().shape({
   startDateTime: date().nullable(),
   endDateTime: date().nullable(),
   requirements: array()
-    .required('Atleast one requirement is required')
+    .required('Please save at least one requirement first')
+    .min(1, 'Please save at least one requirement first')
     .of(
       object().shape({
         contractAddress: string().required(),
@@ -167,23 +166,6 @@ const TokenGateForm = (props: Props) => {
             />
           )}
         />
-        <Controller
-          name={'description'}
-          control={control}
-          defaultValue={null}
-          render={({ field: { onChange, value } }) => (
-            <TextField
-              onChange={onChange}
-              value={value || ''}
-              fullWidth
-              id="token-gate-description"
-              label="Description"
-              name="description"
-              error={Boolean(errors.description)}
-              helperText={errors.description?.message || helpers.description}
-            />
-          )}
-        />
 
         <Controller
           name={'chainId'}
@@ -218,6 +200,24 @@ const TokenGateForm = (props: Props) => {
               </Select>
               <FormHelperText>{errors.chainId?.message}</FormHelperText>
             </FormControl>
+          )}
+        />
+
+        <Controller
+          name={'description'}
+          control={control}
+          defaultValue={null}
+          render={({ field: { onChange, value } }) => (
+            <TextField
+              onChange={onChange}
+              value={value || ''}
+              fullWidth
+              id="token-gate-description"
+              label="Description"
+              name="description"
+              error={Boolean(errors.description)}
+              helperText={errors.description?.message || helpers.description}
+            />
           )}
         />
 
