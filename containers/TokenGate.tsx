@@ -1,5 +1,5 @@
 import Requirement from '@components/Requirement'
-import { BasicChainInformation, CHAINS } from '@config/chains'
+import { BasicChainInformation, SUPPORTED_CHAINS } from '@config/chains'
 import { hooks as metamaskHooks, metamask } from '@config/connectors/metamask'
 import { useToaster } from '@contexts/ToasterContext'
 import { MetamaskError } from '@models/Errors.'
@@ -46,7 +46,9 @@ const getUrl = (urlLike: string): string => {
 
 const Content = (props: { state: State }) => {
   const { state } = props
-  const chain = CHAINS[state.gate?.chainId as number] as BasicChainInformation
+  const chain = SUPPORTED_CHAINS[
+    state.gate?.chainId as number
+  ] as BasicChainInformation
 
   return (
     <>

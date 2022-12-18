@@ -35,6 +35,8 @@ function isExtendedChainInformation(
   return !!(chainInformation as ExtendedChainInformation).nativeCurrency
 }
 
+type Chains = Record<number, BasicChainInformation | ExtendedChainInformation>
+
 export function getAddChainParameters(
   chainId: number
 ): AddEthereumChainParameter | number {
@@ -52,9 +54,7 @@ export function getAddChainParameters(
   }
 }
 
-export const CHAINS: {
-  [chainId: number]: BasicChainInformation | ExtendedChainInformation
-} = {
+export const CHAINS: Chains = {
   1: {
     urls: [
       process.env.INFURA_API_KEY
@@ -184,8 +184,17 @@ export const CHAINS: {
   },
 }
 
+const supportedChainIds = process.env.NEXT_PUBLIC_SUPPORTED_CHAIN_IDS
+  ? process.env.NEXT_PUBLIC_SUPPORTED_CHAIN_IDS.split(',').map(Number)
+  : []
+
+export const SUPPORTED_CHAINS = Object.keys(CHAINS)
+  .map(Number)
+  .filter((id) => supportedChainIds.includes(id))
+  .reduce<Chains>((acc, id) => ({ ...acc, [id]: CHAINS[id] }), {})
+
 export const URLS: { [chainId: number]: string[] } = Object.keys(
-  CHAINS
+  SUPPORTED_CHAINS
 ).reduce<{ [chainId: number]: string[] }>((accumulator, chainId) => {
   const validURLs: string[] = CHAINS[Number(chainId)].urls
 

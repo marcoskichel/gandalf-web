@@ -1,5 +1,5 @@
 import TokenGateRequirementForm from '@components/TokenGateRequirementForm'
-import { CHAINS } from '@config/chains'
+import { SUPPORTED_CHAINS } from '@config/chains'
 import Routes from '@constants/routes'
 import { SupportedContractInterface } from '@constants/SupportedContractInterfaces'
 import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
@@ -195,7 +195,7 @@ const TokenGateForm = (props: Props) => {
                 label="Chain"
                 onChange={onChange}
               >
-                {Object.entries(CHAINS).map(([id, data]) => {
+                {Object.entries(SUPPORTED_CHAINS).map(([id, data]) => {
                   return (
                     <MenuItem key={id} value={id}>
                       {data.name}
