@@ -21,16 +21,19 @@ import {
   FormControl,
   FormHelperText,
   InputLabel,
+  ListItemIcon,
+  ListItemText,
   MenuItem,
   Select,
   TextField,
   Typography,
 } from '@mui/material'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { Controller, FieldError, useForm } from 'react-hook-form'
-import { array, date, number, object, SchemaOf, string, bool, mixed } from 'yup'
+import { array, bool, date, mixed, number, object, SchemaOf, string } from 'yup'
 
 const schema: SchemaOf<TokenGate> = object().shape({
   name: string().required('Name is a required field'),
@@ -198,7 +201,17 @@ const TokenGateForm = (props: Props) => {
                 {Object.entries(SUPPORTED_CHAINS).map(([id, data]) => {
                   return (
                     <MenuItem key={id} value={id}>
-                      {data.name}
+                      <Box
+                        sx={{ display: 'flex', gap: 2, alignItems: 'center' }}
+                      >
+                        <Image
+                          src={data.icon as string}
+                          alt={data.name}
+                          width={30}
+                          height={30}
+                        />
+                        {data.name}
+                      </Box>
                     </MenuItem>
                   )
                 })}
