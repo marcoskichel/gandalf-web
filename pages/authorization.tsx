@@ -1,19 +1,14 @@
 import Navigation from '@containers/Navigation'
-import SignInForm from '@containers/SignInForm'
 import Themed from '@containers/Themed'
 import Toaster from '@containers/Toaster'
+import TokenGate from '@containers/TokenGate'
 import { ToasterContextProvider } from '@contexts/ToasterContext'
+import { TokenGatesContextProvider } from '@contexts/TokenGatesContext'
 import { Container } from '@mui/material'
-import type { GetServerSidePropsContext, NextPage } from 'next'
+import type { NextPage } from 'next'
 import Head from 'next/head'
-import { checkUserIsNotAuthorized } from '@services/authorization'
 
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  await checkUserIsNotAuthorized(ctx)
-  return { props: {} }
-}
-
-const SignIn: NextPage = () => {
+const Authorization: NextPage = () => {
   return (
     <Themed>
       <ToasterContextProvider>
@@ -21,9 +16,11 @@ const SignIn: NextPage = () => {
           <title>Gandalf</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <Navigation title="Sign In" />
+        <Navigation title="Halt!" />
         <Container component="main" maxWidth="xs">
-          <SignInForm />
+          <TokenGatesContextProvider>
+            <TokenGate />
+          </TokenGatesContextProvider>
         </Container>
         <Toaster />
       </ToasterContextProvider>
@@ -31,4 +28,4 @@ const SignIn: NextPage = () => {
   )
 }
 
-export default SignIn
+export default Authorization

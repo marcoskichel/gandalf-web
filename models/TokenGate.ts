@@ -1,13 +1,17 @@
+import { SupportedContractInterface } from '@constants/SupportedContractInterfaces'
 import { Owned } from '@models/Owned'
 
 export interface TokenGateRequirement {
-  chainId: string
-  contract: string
+  contractAddress: string
   amount: number
+  contractInterface: SupportedContractInterface
+  met?: boolean
+  contractName?: string
 }
 
 export interface TokenGate {
   name: string
+  chainId: number
   description?: string | null
   startDateTime?: Date | null
   endDateTime?: Date | null
@@ -15,3 +19,9 @@ export interface TokenGate {
 }
 
 export type OwnedTokenGate = Owned<TokenGate>
+
+export interface TokenGateAuthStatus {
+  account: string
+}
+
+export type UserAuthStatus = Record<string, TokenGateAuthStatus>

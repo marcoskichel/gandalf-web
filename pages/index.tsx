@@ -2,10 +2,10 @@ import Navigation from '@containers/Navigation'
 import Themed from '@containers/Themed'
 import UserTokenGates from '@containers/UserTokenGates'
 import { TokenGatesContextProvider } from '@contexts/TokenGatesContext'
-import { checkUserIsAuthorized } from '@helpers/authorization'
 import { Box } from '@mui/material'
 import type { GetServerSidePropsContext, NextPage } from 'next'
 import Head from 'next/head'
+import { checkUserIsAuthorized } from '@services/authorization'
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const token = await checkUserIsAuthorized(ctx)

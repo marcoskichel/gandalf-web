@@ -1,5 +1,7 @@
 import TokenGateRequirementForm from '@components/TokenGateRequirementForm'
+import { SUPPORTED_CHAINS } from '@config/chains'
 import Routes from '@constants/routes'
+import { SupportedContractInterface } from '@constants/SupportedContractInterfaces'
 import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
 import { useToaster } from '@contexts/ToasterContext'
 import { useTokenGates } from '@contexts/TokenGatesContext'
@@ -16,27 +18,39 @@ import {
   Button,
   CircularProgress,
   Container,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
   TextField,
   Typography,
 } from '@mui/material'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { Controller, FieldError, useForm } from 'react-hook-form'
-import { array, date, number, object, SchemaOf, string } from 'yup'
+import { array, bool, date, mixed, number, object, SchemaOf, string } from 'yup'
 
 const schema: SchemaOf<TokenGate> = object().shape({
   name: string().required('Name is a required field'),
+  chainId: number().required('Chain is a required field'),
   description: string().nullable(),
   startDateTime: date().nullable(),
   endDateTime: date().nullable(),
   requirements: array()
-    .required('Atleast one requirement is required')
+    .required('Please save at least one requirement first')
+    .min(1, 'Please save at least one requirement first')
     .of(
       object().shape({
-        chainId: string().required(),
-        contract: string().required(),
+        contractAddress: string().required(),
+        contractInterface: mixed()
+          .oneOf(Object.values(SupportedContractInterface))
+          .required(),
         amount: number().required(),
+        met: bool(),
+        contractName: string(),
       })
     ),
 })
@@ -152,6 +166,43 @@ const TokenGateForm = (props: Props) => {
             />
           )}
         />
+
+        <Controller
+          name={'chainId'}
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <FormControl fullWidth error={Boolean(errors.chainId)}>
+              <InputLabel id="token-gate-chain-label">Chain</InputLabel>
+              <Select
+                labelId="token-gate-chain-label"
+                id="token-gate-chain"
+                value={value || ''}
+                label="Chain"
+                onChange={onChange}
+              >
+                {Object.entries(SUPPORTED_CHAINS).map(([id, data]) => {
+                  return (
+                    <MenuItem key={id} value={id}>
+                      <Box
+                        sx={{ display: 'flex', gap: 2, alignItems: 'center' }}
+                      >
+                        <Image
+                          src={data.icon as string}
+                          alt={data.name}
+                          width={30}
+                          height={30}
+                        />
+                        {data.name}
+                      </Box>
+                    </MenuItem>
+                  )
+                })}
+              </Select>
+              <FormHelperText>{errors.chainId?.message}</FormHelperText>
+            </FormControl>
+          )}
+        />
+
         <Controller
           name={'description'}
           control={control}
@@ -180,13 +231,14 @@ const TokenGateForm = (props: Props) => {
               <>
                 {reqs.map((req) => (
                   <TokenGateRequirementForm
-                    key={req.contract}
+                    key={req.contractAddress}
                     requirement={req}
                     onDelete={(deleted) => {
                       setValue(
                         'requirements',
                         value.filter(
-                          (item) => item.contract !== deleted.contract
+                          (item) =>
+                            item.contractAddress !== deleted.contractAddress
                         )
                       )
                     }}
