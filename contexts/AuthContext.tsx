@@ -48,10 +48,10 @@ const AuthContextProvider = (props: Props) => {
       if (user) {
         const token = await user.getIdToken()
         setUser(user)
-        nookies.set(undefined, 'token', token, { path: Routes.home })
+        nookies.set(undefined, 'admin-token', token, { path: Routes.home })
       } else {
         setUser(null)
-        nookies.set(undefined, 'token', '', { path: Routes.home })
+        nookies.set(undefined, 'admin-token', '', { path: Routes.home })
       }
     })
   }, [])
