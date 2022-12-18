@@ -23,7 +23,7 @@ const getTokenPayload = (req: NextApiRequest): TokenPayload => {
   const token = req.cookies[TOKEN_COOKIE]
   if (token) {
     const existingToken = jwt.decode(token) as jwt.JwtPayload
-    return existingToken?.status as TokenPayload
+    return existingToken as TokenPayload
   }
   return {}
 }
@@ -40,9 +40,9 @@ const isTokenValid = (req: NextApiRequest): boolean => {
 
 const checkAccountAgainstRequirements = async (
   req: NextApiRequest,
-  res: NextApiResponse<TokenGate | { message: string }>
+  res: NextApiResponse<TokenGate | { message: string } | void>
 ): Promise<void> => {
-  const { gateId } = req.query as { gateId: string }
+  const { id: gateId } = req.query as { id: string }
   const { account } = JSON.parse(req.body) as Props
   const gate = await loadGate(gateId, account)
 
@@ -64,16 +64,22 @@ const checkAccountAgainstRequirements = async (
       maxAge: 60 * 60 * 4,
       path: '/',
     })
-    res.status(200).send(gate)
+
+    const allMet = gate.requirements.every((r) => r.met)
+    if (allMet) {
+      return res.status(204).send()
+    }
+    return res.status(200).send(gate)
   }
-  res.status(400).send({ message: 'Token gate not found.' })
+
+  return res.status(400).send({ message: 'Token gate not found.' })
 }
 
 const retrieveGate = async (
   req: NextApiRequest,
   res: NextApiResponse<TokenGate | { message: string } | void>
 ): Promise<void> => {
-  const { gateId } = req.query as { gateId: string }
+  const { id: gateId } = req.query as { id: string }
   const validToken = isTokenValid(req)
   const payload = validToken ? getTokenPayload(req) : {}
 
@@ -93,12 +99,12 @@ const retrieveGate = async (
   if (gate) {
     const allMet = gate.requirements.every((r) => r.met)
     if (allMet) {
-      res.status(204).send()
+      return res.status(204).send()
     }
-    res.status(200).send(gate)
+    return res.status(200).send(gate)
   }
 
-  res.status(400).send({ message: 'Token gate not found.' })
+  return res.status(400).send({ message: 'Token gate not found.' })
 }
 
 export default async function handler(

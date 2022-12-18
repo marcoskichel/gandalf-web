@@ -41,7 +41,7 @@ const Requirement = (props: Props) => {
           <Checkbox
             disableRipple
             sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }, cursor: 'default' }}
-            checked={requirement.met}
+            checked={!!requirement.met}
             inputProps={{ 'aria-label': 'controlled' }}
           />
         )

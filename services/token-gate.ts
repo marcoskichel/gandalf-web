@@ -32,7 +32,7 @@ const loadRequirement = async (
   const abi = SupportedContractInterfaceAbis[requirement.contractInterface]
   const address = requirement.contractAddress
   const contract = new ethers.Contract(address, abi, provider)
-  const contractName = contract.name()
+  const contractName = await contract.name()
 
   if (account) {
     const met = await isAccountMetRequirement(account, contract, requirement)
@@ -42,23 +42,20 @@ const loadRequirement = async (
   return { ...requirement, contractName, met: requirement.met }
 }
 
-const checkGateRequirements = async (
-  account: string,
+export async function loadGate(
   gateId: string,
-  requirements: TokenGateRequirement[]
-): Promise<TokenGate | null> => {
+  account?: string
+): Promise<TokenGate | null> {
   const gate = await getGate(gateId)
   if (gate) {
     const [url] = URLS[gate.chainId]
     const provider = new ethers.providers.JsonRpcProvider(url)
-    const loadedRequirements = await Promise.all(
-      requirements.map(async (requirement) => {
+    const requirements = await Promise.all(
+      gate.requirements.map(async (requirement) => {
         return loadRequirement(requirement, provider, account)
       })
     )
-    return { ...gate, requirements: loadedRequirements }
+    return { ...gate, requirements }
   }
   return null
 }
-
-export { checkGateRequirements }

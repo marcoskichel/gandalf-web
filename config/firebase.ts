@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import firebaseConfig from '@constants/firebaseConfig'
 import { OwnedTokenGate, TokenGateAuthStatus } from '@models/TokenGate'
-import { getApp, getApps, initializeApp } from 'firebase/app'
+import { FirebaseError, getApp, getApps, initializeApp } from 'firebase/app'
 import { connectAuthEmulator, getAuth } from 'firebase/auth'
 import {
   collection,
@@ -18,8 +18,15 @@ const db = getFirestore(app)
 const auth = getAuth(app)
 
 if (process.env.NODE_ENV === 'development') {
-  connectFirestoreEmulator(db, 'localhost', 8080)
-  connectAuthEmulator(auth, 'http://localhost:9099/')
+  try {
+    connectAuthEmulator(auth, 'http://localhost:9099/')
+    connectFirestoreEmulator(db, 'localhost', 8080)
+  } catch (e) {
+    const fbError = e as FirebaseError
+    if (fbError.code !== 'failed-precondition') {
+      throw fbError
+    }
+  }
 }
 
 auth.useDeviceLanguage()
@@ -43,26 +50,12 @@ const tokenGateConverter: FirestoreDataConverter<OwnedTokenGate> = {
   },
 }
 
-const authStatusesConverter: FirestoreDataConverter<TokenGateAuthStatus> = {
-  toFirestore: (data) => data,
-  fromFirestore: (snapshot) => {
-    const data = snapshot.data() as TokenGateAuthStatus
-    const authenticatedAt = data.authenticatedAt as unknown as Timestamp
-    return {
-      ...data,
-      authenticatedAt: authenticatedAt?.toDate(),
-    }
-  },
-}
-
 const AppCollections = {
   tokenGates:
     createCollection<OwnedTokenGate>('tokenGates').withConverter(
       tokenGateConverter
     ),
-  authStatuses: createCollection<TokenGateAuthStatus>(
-    'authStatuses'
-  ).withConverter(authStatusesConverter),
+  authStatuses: createCollection<TokenGateAuthStatus>('authStatuses'),
 }
 
 export default app

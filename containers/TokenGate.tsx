@@ -1,17 +1,10 @@
 import Requirement from '@components/Requirement'
 import { BasicChainInformation, CHAINS } from '@config/chains'
 import { hooks as metamaskHooks, metamask } from '@config/connectors/metamask'
-import { hooks as networkHooks, network } from '@config/connectors/network'
 import { useToaster } from '@contexts/ToasterContext'
-import { useTokenGates } from '@contexts/TokenGatesContext'
-import getContract from '@helpers/getContract'
-import { ERC721Abi } from '@models/ERC721'
 import { MetamaskError } from '@models/Errors.'
-import {
-  LoadedTokenGateRequirement,
-  MetTokenGateRequirement,
-  TokenGate,
-} from '@models/TokenGate'
+import { TokenGate } from '@models/TokenGate'
+import Navigation from '@containers/Navigation'
 import {
   Box,
   Button,
@@ -20,46 +13,40 @@ import {
   CardContent,
   CardHeader,
   CircularProgress,
+  Container,
   Divider,
   Typography,
 } from '@mui/material'
-import { Contract } from 'ethers'
 import Image from 'next/image'
+import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
-import useFetch from 'react-fetch-hook'
+import { sanitizeUrl } from '@braintree/sanitize-url'
 
-const { useProvider: useNetworkProvider } = networkHooks
 const { useAccount: useMetamaskAccount } = metamaskHooks
 
-interface Props {
-  gateId: string
-}
-
 interface State {
-  loading: boolean
   gate?: TokenGate
-  requirements?: LoadedTokenGateRequirement[]
-  chain?: BasicChainInformation
-  allMet: boolean
+  initialLoading: boolean
+  checkingRequirements: boolean
+  authenticated: boolean
 }
 
-const Content = (props: { state: State; isCheckingRequirements: boolean }) => {
-  const { state, isCheckingRequirements } = props
-
-  if (state.loading) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    )
+const getUrl = (urlLike: string): string => {
+  const sanitized = sanitizeUrl(urlLike)
+  try {
+    const url = new URL(sanitized)
+    return url.toString()
+  } catch (error) {
+    if (sanitized.startsWith('https://')) {
+      throw error
+    }
+    return getUrl(`https://${sanitized}`)
   }
+}
 
-  const chain = state.chain as BasicChainInformation
+const Content = (props: { state: State }) => {
+  const { state } = props
+  const chain = CHAINS[state.gate?.chainId as number] as BasicChainInformation
 
   return (
     <>
@@ -70,127 +57,69 @@ const Content = (props: { state: State; isCheckingRequirements: boolean }) => {
         <Typography variant="h6">{chain.name} Network</Typography>
       </Box>
 
-      {state.requirements?.map((req) => (
+      {state.gate?.requirements?.map((req) => (
         <Requirement
           key={req.contractAddress}
           requirement={req}
-          isLoading={isCheckingRequirements}
+          isLoading={state.checkingRequirements}
         />
       ))}
     </>
   )
 }
 
-const TokenGate = (props: Props) => {
-  const { gateId } = props
+const TokenGate = () => {
+  const { query, push } = useRouter()
+  const { id: gateId, redirectUrl } = query
 
-  const networkProvider = useNetworkProvider()
   const metamaskAccount = useMetamaskAccount()
-
-  const { findTokenGate } = useTokenGates()
   const { setToast } = useToaster()
 
   const [state, setState] = useState<State>({
-    loading: true,
-    allMet: false,
+    initialLoading: true,
+    checkingRequirements: false,
+    authenticated: false,
   })
 
-  const { data: metRequirements, isLoading: isCheckingRequirements } = useFetch<
-    MetTokenGateRequirement[]
-  >(`/api/connect-wallet`, {
-    method: 'POST',
-    body: JSON.stringify({
-      account: metamaskAccount,
-      chainId: state.gate?.chainId,
-      requirements: state.gate?.requirements,
-    }),
-    depends: [!!state.gate, !!metamaskAccount],
-  })
-
-  // Update state with met requirements
   useEffect(() => {
-    if (metRequirements && state.requirements) {
-      const statusChanged = state.requirements?.some((req) => {
-        const metReq = metRequirements.find(
-          (item) => item.contractAddress === req.contractAddress
-        )
-        return req.met !== metReq?.met
-      })
-
-      if (statusChanged) {
-        const requirements = state.requirements?.map((req) => {
-          const metRequirement = metRequirements.find(
-            (item) => item.contractAddress === req.contractAddress
-          )
-          return {
-            ...req,
-            met: metRequirement?.met || false,
-          }
-        })
-        setState((state) => ({ ...state, requirements }))
-      }
-    }
-  }, [metRequirements, state.requirements])
-
-  // Loads the token gate from the firestore database
-  // and connects to the gate chain
-  useEffect(() => {
-    const connectToNetwork = async (chainId: number) => {
+    const loadGate = async () => {
       try {
-        await network.activate(chainId)
-      } catch (err) {
-        // TODO: Handle connection errors
-        console.error(err)
+        if (gateId) {
+          const res = await fetch(`/api/token-gates/${gateId}`)
+          if (res.status === 204) {
+            const url = getUrl(redirectUrl as string)
+            window.location.href = url
+          } else {
+            const gate = await res.json()
+            setState((prev) => ({ ...prev, gate, initialLoading: false }))
+          }
+        }
+      } catch (error) {
+        console.error(error)
       }
     }
+    loadGate()
+  }, [gateId, push, redirectUrl])
 
-    const loadTokenGate = async () => {
-      const doc = await findTokenGate(gateId)
-
-      if (!doc.exists()) {
-        throw new Error('TokenGate not found')
-        // TODO: Redirect to not found page
-      }
-
-      const gate = doc.data()
-      await connectToNetwork(gate.chainId)
-
-      setState((prev) => ({
-        ...prev,
-        ...{
-          gate,
-          chain: CHAINS[gate.chainId],
-        },
-      }))
-    }
-
-    loadTokenGate()
-  }, [findTokenGate, gateId])
-
-  // Decorates the gate requirements with data
-  // from the blockchain and sets loading to false
   useEffect(() => {
-    const decorateRequirements = async (gate: TokenGate) => {
-      if (networkProvider) {
-        const requirements = await Promise.all(
-          gate.requirements.map(async (req) => {
-            const contract = await getContract<Contract>(
-              req.contractAddress,
-              ERC721Abi,
-              networkProvider
-            )
-            const contractName = await contract.name()
-            return { ...req, contract, contractName, met: false }
-          })
-        )
-        setState((prev) => ({ ...prev, ...{ requirements, loading: false } }))
+    const checkRequirements = async () => {
+      setState((prev) => ({ ...prev, checkingRequirements: true }))
+      const res = await fetch(`/api/token-gates/${gateId}`, {
+        method: 'POST',
+        body: JSON.stringify({ account: metamaskAccount }),
+      })
+      if (res.status === 204) {
+        const url = getUrl(redirectUrl as string)
+        window.location.href = url
+      } else {
+        const gate = await res.json()
+        setState((prev) => ({ ...prev, gate, checkingRequirements: false }))
       }
     }
-
-    if (state.gate) {
-      decorateRequirements(state.gate)
+    if (metamaskAccount) {
+      checkRequirements()
     }
-  }, [networkProvider, state.gate])
+  }, [gateId, metamaskAccount, redirectUrl])
 
   const connectMetamask = useCallback(async () => {
     if (!metamaskAccount) {
@@ -210,41 +139,58 @@ const TokenGate = (props: Props) => {
     }
   }, [metamaskAccount, setToast, state.gate?.chainId])
 
+  if (state.initialLoading) {
+    return (
+      <Box
+        sx={{
+          height: '100vh',
+          alignItems: 'center',
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    )
+  }
+
   return (
-    <Card>
-      <CardHeader
-        title="VIP only area ahead"
-        subheader="Please confirm the following tokens ownership by connecting your wallet(s)."
-      />
-      <Divider />
-      <CardContent>
-        <Content
-          state={state}
-          isCheckingRequirements={isCheckingRequirements}
-        />
-      </CardContent>
-      <CardActions>
-        <Button
-          color="default"
-          startIcon={
-            <Image
-              src="/icons/metamask.svg"
-              alt="Metamask"
-              width={30}
-              height={30}
-            />
-          }
-          type="button"
-          fullWidth
-          size="large"
-          variant="contained"
-          sx={{ mt: 3 }}
-          onClick={connectMetamask}
-        >
-          Connect Metamask
-        </Button>
-      </CardActions>
-    </Card>
+    <>
+      <Navigation title="Halt!" />
+      <Container component="main" maxWidth="xs">
+        <Card>
+          <CardHeader
+            title="VIP only area ahead"
+            subheader="Please confirm the following tokens ownership by connecting your wallet(s)."
+          />
+          <Divider />
+          <CardContent>
+            <Content state={state} />
+          </CardContent>
+          <CardActions>
+            <Button
+              color="default"
+              startIcon={
+                <Image
+                  src="/icons/metamask.svg"
+                  alt="Metamask"
+                  width={30}
+                  height={30}
+                />
+              }
+              type="button"
+              fullWidth
+              size="large"
+              variant="contained"
+              sx={{ mt: 3 }}
+              onClick={connectMetamask}
+            >
+              Connect Metamask
+            </Button>
+          </CardActions>
+        </Card>
+      </Container>
+    </>
   )
 }
 
