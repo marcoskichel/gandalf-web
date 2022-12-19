@@ -69,7 +69,11 @@ const TokenGateForm = (props: Props) => {
     setValue,
     setError,
     clearErrors,
+    watch,
   } = useForm<TokenGate>({
+    defaultValues: {
+      chainId: Object.keys(SUPPORTED_CHAINS).map(Number)[0],
+    },
     resolver: yupResolver(schema),
   })
 
@@ -80,6 +84,7 @@ const TokenGateForm = (props: Props) => {
 
   const [now] = useState(new Date())
   const [loading, setLoading] = useState(true)
+  const chainId = watch('chainId')
 
   const helpers: Partial<Record<keyof TokenGate, string>> = {
     startDateTime: 'Empty means it starts imediatelly',
@@ -232,6 +237,7 @@ const TokenGateForm = (props: Props) => {
                 {reqs.map((req) => (
                   <TokenGateRequirementForm
                     key={req.contractAddress}
+                    chainId={chainId}
                     requirement={req}
                     onDelete={(deleted) => {
                       setValue(
@@ -245,6 +251,7 @@ const TokenGateForm = (props: Props) => {
                   />
                 ))}
                 <TokenGateRequirementForm
+                  chainId={chainId}
                   existingRequirements={reqs}
                   onAdd={(req) => {
                     onChange([...reqs, req])
