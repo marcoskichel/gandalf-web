@@ -1,10 +1,9 @@
 import { useMemo } from 'react'
-
 import { AddressZero } from '@ethersproject/constants'
 import { Provider } from '@ethersproject/providers'
 import { ContractInterface } from 'ethers'
 import { isAddress } from 'ethers/lib/utils'
-import getContract from '@helpers/getContract'
+import { getContract } from '@services/contracts'
 
 const useContract = <Contract = unknown>(
   provider: Provider,

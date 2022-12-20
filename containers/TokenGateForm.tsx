@@ -5,7 +5,6 @@ import { SupportedContractInterface } from '@constants/SupportedContractInterfac
 import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
 import { useToaster } from '@contexts/ToasterContext'
 import { useTokenGates } from '@contexts/TokenGatesContext'
-import { getDateError } from '@helpers/validations'
 import { yupResolver } from '@hookform/resolvers/yup'
 import {
   OwnedTokenGate,
@@ -26,19 +25,16 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { Controller, FieldError, useForm } from 'react-hook-form'
-import { array, bool, date, mixed, number, object, SchemaOf, string } from 'yup'
+import { array, bool, mixed, number, object, SchemaOf, string } from 'yup'
 
 const schema: SchemaOf<TokenGate> = object().shape({
   name: string().required('Name is a required field'),
   chainId: number().required('Chain is a required field'),
   description: string().nullable(),
-  startDateTime: date().nullable(),
-  endDateTime: date().nullable(),
   requirements: array()
     .required('Please save at least one requirement first')
     .min(1, 'Please save at least one requirement first')
@@ -67,8 +63,6 @@ const TokenGateForm = (props: Props) => {
     control,
     formState: { errors },
     setValue,
-    setError,
-    clearErrors,
     watch,
   } = useForm<TokenGate>({
     defaultValues: {
@@ -82,14 +76,10 @@ const TokenGateForm = (props: Props) => {
   const { setNavigationLoading } = useGlobalLoading()
   const router = useRouter()
 
-  const [now] = useState(new Date())
   const [loading, setLoading] = useState(true)
   const chainId = watch('chainId')
 
-  const helpers: Partial<Record<keyof TokenGate, string>> = {
-    startDateTime: 'Empty means it starts imediatelly',
-    endDateTime: 'Empty means it never expires',
-  }
+  const helpers: Partial<Record<keyof TokenGate, string>> = {}
 
   useEffect(() => {
     const loadTokenGate = async () => {
@@ -261,81 +251,6 @@ const TokenGateForm = (props: Props) => {
             )
           }}
         />
-
-        <Typography variant="h5">Time Constraints</Typography>
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 2,
-            flexDirection: { xs: 'column', sm: 'column', md: 'row' },
-          }}
-        >
-          <Controller
-            name={'startDateTime'}
-            control={control}
-            defaultValue={null}
-            render={({ field: { onChange, value } }) => (
-              <DateTimePicker
-                onAccept={() => clearErrors('startDateTime')}
-                onError={(reason) =>
-                  setError(
-                    'startDateTime',
-                    getDateError(reason as string, 'Start Date')
-                  )
-                }
-                minDateTime={now}
-                renderInput={(props) => (
-                  <TextField
-                    fullWidth
-                    id="token-gate-start-date"
-                    name="start-date-time"
-                    error={Boolean(errors.startDateTime)}
-                    helperText={
-                      errors.startDateTime?.message || helpers.startDateTime
-                    }
-                    {...props}
-                  />
-                )}
-                onChange={onChange}
-                value={value || null}
-                label="Start Date"
-              />
-            )}
-          />
-          <Controller
-            name={'endDateTime'}
-            control={control}
-            defaultValue={null}
-            render={({ field: { onChange, value } }) => (
-              <DateTimePicker
-                minDateTime={now}
-                onAccept={() => clearErrors('endDateTime')}
-                onError={(reason) =>
-                  setError(
-                    'endDateTime',
-                    getDateError(reason as string, 'End Date')
-                  )
-                }
-                renderInput={(props) => (
-                  <TextField
-                    fullWidth
-                    id="token-gate-start-date"
-                    name="start-date-time"
-                    error={Boolean(errors.endDateTime)}
-                    helperText={
-                      errors.endDateTime?.message || helpers.endDateTime
-                    }
-                    {...props}
-                  />
-                )}
-                onChange={onChange}
-                value={value || null}
-                label="End Date"
-              />
-            )}
-          />
-        </Box>
-
         <Box sx={{ ml: 'auto' }}>
           <Button
             type="submit"

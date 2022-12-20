@@ -8,9 +8,7 @@ import {
   CollectionReference,
   connectFirestoreEmulator,
   DocumentData,
-  FirestoreDataConverter,
   getFirestore,
-  Timestamp,
 } from 'firebase/firestore'
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
@@ -36,25 +34,8 @@ const createCollection = <T = DocumentData>(collectionName: string) => {
   return col as CollectionReference<T>
 }
 
-const tokenGateConverter: FirestoreDataConverter<OwnedTokenGate> = {
-  toFirestore: (data) => data,
-  fromFirestore: (snapshot) => {
-    const data = snapshot.data() as OwnedTokenGate
-    const endDateTime = data.endDateTime as Timestamp | null
-    const startDateTime = data.startDateTime as Timestamp | null
-    return {
-      ...data,
-      endDateTime: endDateTime?.toDate(),
-      startDateTime: startDateTime?.toDate(),
-    }
-  },
-}
-
 const AppCollections = {
-  tokenGates:
-    createCollection<OwnedTokenGate>('tokenGates').withConverter(
-      tokenGateConverter
-    ),
+  tokenGates: createCollection<OwnedTokenGate>('tokenGates'),
   authStatuses: createCollection<TokenGateAuthStatus>('authStatuses'),
 }
 

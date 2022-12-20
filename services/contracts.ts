@@ -1,7 +1,8 @@
 import { URLS } from '@config/chains'
 import { ERC165Abi } from '@constants/abis'
 import { SupportedContractInterface } from '@constants/SupportedContractInterfaces'
-import { ethers } from 'ethers'
+import { ethers, Contract, ContractInterface, Signer } from 'ethers'
+import { Provider } from '@ethersproject/providers'
 
 const ERC1155InterfaceId = '0xd9b67a26'
 const ERC721InterfaceId = '0x80ac58cd'
@@ -26,17 +27,23 @@ export const getContractInterface = async (
   const provider = new ethers.providers.JsonRpcProvider(url)
   const contract = new ethers.Contract(address, ERC165Abi, provider)
 
-  if (await contract.supportsInterface(ERC1155InterfaceId)) {
-    return SupportedContractInterface.ERC1155
-  }
+  const ercs = await Promise.all([
+    contract.supportsInterface(ERC1155InterfaceId),
+    contract.supportsInterface(ERC721InterfaceId),
+    contract.supportsInterface(ERC20InterfaceId),
+  ])
 
-  if (await contract.supportsInterface(ERC721InterfaceId)) {
-    return SupportedContractInterface.ERC721
-  }
-
-  if (await contract.supportsInterface(ERC20InterfaceId)) {
-    return SupportedContractInterface.ERC20
-  }
+  if (ercs[0]) return SupportedContractInterface.ERC1155
+  if (ercs[1]) return SupportedContractInterface.ERC721
+  if (ercs[2]) return SupportedContractInterface.ERC20
 
   throw new Error('Contract interface not supported')
+}
+
+export const getContract = <T = Contract>(
+  address: string,
+  abi: ContractInterface,
+  provider: Signer | Provider
+) => {
+  return <T>(<unknown>new Contract(address, abi, provider))
 }
