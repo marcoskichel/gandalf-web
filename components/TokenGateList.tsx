@@ -29,7 +29,6 @@ interface ItemProps {
 
 const TokenGateListItem = (props: ItemProps) => {
   const { tokenGate, onClick } = props
-  tokenGate.startDateTime
 
   return (
     <Grid item xs={12} sm={6} md={4} sx={{ mt: 2, mb: 2 }}>
