@@ -6,6 +6,8 @@ import { Box } from '@mui/material'
 import type { GetServerSidePropsContext, NextPage } from 'next'
 import Head from 'next/head'
 import { checkUserIsAuthorized } from '@services/authorization'
+import { ToasterContextProvider } from '@contexts/ToasterContext'
+import Toaster from '@containers/Toaster'
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const token = await checkUserIsAuthorized(ctx)
@@ -18,22 +20,25 @@ const Home: NextPage = () => {
   return (
     <TokenGatesContextProvider>
       <Themed>
-        <Box>
-          <Head>
-            <title>Gandalf</title>
-            <meta
-              name="description"
-              content="The home page of the gandalf website"
-            />
-            <link rel="icon" href="/favicon.ico" />
-          </Head>
+        <ToasterContextProvider>
+          <Box>
+            <Head>
+              <title>Gandalf</title>
+              <meta
+                name="description"
+                content="The home page of the gandalf website"
+              />
+              <link rel="icon" href="/favicon.ico" />
+            </Head>
 
-          <Navigation title="Home" />
+            <Navigation title="Home" />
 
-          <Box component="main">
-            <UserTokenGates />
+            <Box component="main">
+              <UserTokenGates />
+            </Box>
           </Box>
-        </Box>
+          <Toaster />
+        </ToasterContextProvider>
       </Themed>
     </TokenGatesContextProvider>
   )

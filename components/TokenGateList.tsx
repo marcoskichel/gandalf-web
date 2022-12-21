@@ -1,46 +1,102 @@
+import { useThemes } from '@contexts/ThemesContext'
+import { useToaster } from '@contexts/ToasterContext'
+import { copyTextToClipboard } from '@helpers/clipboard'
 import { TokenGate } from '@models/TokenGate'
 import AddIcon from '@mui/icons-material/Add'
+import CopyIcon from '@mui/icons-material/ContentCopy'
 import {
   Box,
+  Button,
   Card,
   CardActionArea,
+  CardActions,
   CardContent,
   CircularProgress,
   Container,
+  Divider,
   Grid,
+  IconButton,
+  InputBase,
+  Paper,
   styled,
   Typography,
 } from '@mui/material'
 import { QueryDocumentSnapshot } from 'firebase/firestore'
+import { useCallback } from 'react'
 
 type GateDoc = QueryDocumentSnapshot<TokenGate>
 
 const CustomCardActionArea = styled(CardActionArea)(() => ({
   display: 'flex',
   padding: '1rem',
-  minHeight: '208px',
+  height: '100%',
   width: '100%',
 }))
 
 interface ItemProps {
   tokenGate: TokenGate
+  tokenGateId: string
   onClick?: () => void
 }
 
+const CopyToClipboard = ({ tokenGateId }: { tokenGateId: string }) => {
+  const url = `${window.location.origin}/token-gates/${tokenGateId}`
+  const { currentTheme: theme } = useThemes()
+  const { setToast } = useToaster()
+
+  const copy = useCallback(() => {
+    copyTextToClipboard(url)
+    setToast({ severity: 'success', message: 'Gate URL copied to clipboard' })
+  }, [setToast, url])
+
+  return (
+    <Paper
+      sx={{
+        paddingY: '2px',
+        paddingLeft: '1rem',
+        paddingRight: '2px',
+        mt: 3,
+        display: 'flex',
+        alignItems: 'center',
+        backgroundColor: theme.palette.default.main,
+      }}
+    >
+      <InputBase
+        sx={{ flex: 1 }}
+        value={url}
+        inputProps={{ 'aria-label': 'Copy to clipboard' }}
+      />
+      <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+      <IconButton
+        onClick={copy}
+        color="primary"
+        sx={{ p: '10px' }}
+        aria-label="copy url to clipboard"
+      >
+        <CopyIcon />
+      </IconButton>
+    </Paper>
+  )
+}
+
 const TokenGateListItem = (props: ItemProps) => {
-  const { tokenGate, onClick } = props
+  const { tokenGate, tokenGateId, onClick } = props
 
   return (
     <Grid item xs={12} sm={6} md={4} sx={{ mt: 2, mb: 2 }}>
-      <Card onClick={onClick}>
-        <CustomCardActionArea
-          sx={{ justifyContent: 'normal', alignItems: 'normal' }}
+      <Card sx={{ height: '100%' }}>
+        <CardContent
+          sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}
         >
-          <CardContent sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="subtitle1">{tokenGate.name}</Typography>
-            <Typography variant="body2">{tokenGate.description}</Typography>
-          </CardContent>
-        </CustomCardActionArea>
+          <Typography variant="subtitle1">{tokenGate.name}</Typography>
+          <Typography variant="body2">{tokenGate.description}</Typography>
+          <CopyToClipboard tokenGateId={tokenGateId} />
+        </CardContent>
+        <CardActions>
+          <Button onClick={onClick} sx={{ marginLeft: 'auto' }}>
+            Edit Gate
+          </Button>
+        </CardActions>
       </Card>
     </Grid>
   )
@@ -55,7 +111,7 @@ const AddButton = (props: AddButtonProps) => {
 
   return (
     <Grid item xs={12} sm={6} md={4} sx={{ mt: 2, mb: 2 }}>
-      <Card onClick={onClick}>
+      <Card onClick={onClick} sx={{ height: '100%' }}>
         <CustomCardActionArea
           sx={{
             flexDirection: 'column',
@@ -106,11 +162,12 @@ const TokenGateList = (props: Props) => {
   }
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={2} lineHeight={210}>
       {showAddButton && <AddButton onClick={onAddClick} />}
       {tokenGates.map((gate) => (
         <TokenGateListItem
           key={gate.id}
+          tokenGateId={gate.id}
           tokenGate={gate.data()}
           onClick={() => onItemClick(gate)}
         />
