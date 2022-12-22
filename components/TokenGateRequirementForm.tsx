@@ -1,4 +1,3 @@
-import { SupportedContractInterface } from '@constants/SupportedContractInterfaces'
 import { useToaster } from '@contexts/ToasterContext'
 import { yupResolver } from '@hookform/resolvers/yup'
 import ClearIcon from '@mui/icons-material/Clear'
@@ -52,59 +51,13 @@ const TokenGateRequirementForm = (props: Props) => {
     control,
     formState: { errors },
     setValue,
+    setError,
     reset,
-    watch,
   } = useForm<TokenGateRequirement>({
     resolver: yupResolver(schema),
   })
 
-  const { setToast } = useToaster()
-  const contractAddress = watch('contractAddress')
-
-  const [validating, setValidating] = useState(false)
-  const [contractInterface, setContractInterface] =
-    useState<SupportedContractInterface>()
-
-  useEffect(() => {
-    const loadContractDetails = async () => {
-      setValidating(true)
-      const exists = await contractExists(chainId, contractAddress)
-      if (!exists) {
-        setToast({
-          message: 'Contract does not exist',
-          severity: 'error',
-        })
-        setValidating(false)
-        setValue('contractAddress', '')
-        return
-      }
-
-      try {
-        const interfaceValue = await getContractInterface(
-          chainId,
-          contractAddress
-        )
-        setContractInterface(interfaceValue)
-      } catch (e) {
-        const error = e as Error
-        setToast({
-          message: error.message,
-          severity: 'error',
-        })
-        setValue('contractAddress', '')
-      } finally {
-        setValidating(false)
-      }
-    }
-
-    const timer = setTimeout(() => {
-      if (contractAddress?.length === 42) {
-        loadContractDetails()
-      }
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [chainId, contractAddress, setToast, setValue])
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (requirement) {
@@ -115,9 +68,43 @@ const TokenGateRequirementForm = (props: Props) => {
   }, [requirement, setValue])
 
   const onSubmit = handleSubmit(async (data) => {
-    if (contractInterface) {
-      onAdd({ ...data, contractInterface })
-      reset()
+    const contractAddress = data.contractAddress
+    if (contractAddress.length !== 42 || !contractAddress.startsWith('0x')) {
+      setError('contractAddress', {
+        type: 'custom',
+        message: 'Invalid contract address',
+      })
+      return
+    }
+
+    setSubmitting(true)
+    const exists = await contractExists(chainId, contractAddress)
+    if (!exists) {
+      setError('contractAddress', {
+        type: 'custom',
+        message: 'Contract address does not exist',
+      })
+      setSubmitting(false)
+      return
+    }
+
+    try {
+      const interfaceValue = await getContractInterface(
+        chainId,
+        contractAddress
+      )
+      if (interfaceValue) {
+        onAdd({ ...data, contractInterface: interfaceValue })
+        reset()
+      }
+      setSubmitting(false)
+    } catch (e) {
+      const error = e as Error
+      setSubmitting(false)
+      setError('contractAddress', {
+        type: 'custom',
+        message: error.message,
+      })
     }
   })
 
@@ -145,11 +132,11 @@ const TokenGateRequirementForm = (props: Props) => {
             id="token-gate-requirement-contract-address-label"
             label="Contract Address"
             name="token-gate-requirement-contract-address"
-            disabled={Boolean(requirement) || validating}
+            disabled={Boolean(requirement) || submitting}
             error={Boolean(errors.contractAddress)}
             helperText={errors.contractAddress?.message}
             InputProps={{
-              endAdornment: validating && !Boolean(requirement) && (
+              endAdornment: submitting && !Boolean(requirement) && (
                 <InputAdornment position="end">
                   <CircularProgress />
                 </InputAdornment>
@@ -198,7 +185,7 @@ const TokenGateRequirementForm = (props: Props) => {
           aria-label="add requirement"
           sx={{ width: 45, height: 45, mt: 1 }}
           onClick={onSubmit}
-          disabled={validating}
+          disabled={submitting}
         >
           <SaveIcon />
         </IconButton>
