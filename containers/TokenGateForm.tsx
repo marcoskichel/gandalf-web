@@ -27,7 +27,7 @@ import {
 } from '@mui/material'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Controller, FieldError, useForm } from 'react-hook-form'
 import { array, bool, mixed, number, object, SchemaOf, string } from 'yup'
 
@@ -35,6 +35,7 @@ const schema: SchemaOf<TokenGate> = object().shape({
   name: string().required('Name is a required field'),
   chainId: number().required('Chain is a required field'),
   description: string().nullable(),
+  redirectUrl: string().nullable(),
   requirements: array()
     .required('Please save at least one requirement first')
     .min(1, 'Please save at least one requirement first')
@@ -63,6 +64,7 @@ const TokenGateForm = (props: Props) => {
     control,
     formState: { errors },
     setValue,
+    setError,
     watch,
   } = useForm<TokenGate>({
     defaultValues: {
@@ -100,12 +102,34 @@ const TokenGateForm = (props: Props) => {
     loadTokenGate()
   }, [findTokenGate, id, router, setValue])
 
+  const validateRedirectUrl = useCallback(
+    (url: string) => {
+      if (url.length === 0) return true
+      try {
+        new URL(url)
+        return true
+      } catch (e) {
+        setError('redirectUrl', {
+          type: 'custom',
+          message: 'Invalid URL',
+        })
+        return false
+      }
+    },
+    [setError]
+  )
+
   const onSubmit = handleSubmit(
     async (data) => {
       try {
-        setNavigationLoading(true)
-        id ? await updateTokenGate(id, data) : await addTokenGate(data)
-        router.push(Routes.home)
+        const isValidRedirectUrl = await validateRedirectUrl(
+          data.redirectUrl || ''
+        )
+        if (isValidRedirectUrl) {
+          setNavigationLoading(true)
+          id ? await updateTokenGate(id, data) : await addTokenGate(data)
+          router.push(Routes.home)
+        }
       } finally {
         setNavigationLoading(false)
       }
@@ -166,7 +190,7 @@ const TokenGateForm = (props: Props) => {
           name={'chainId'}
           control={control}
           render={({ field: { onChange, value } }) => (
-            <FormControl fullWidth error={Boolean(errors.chainId)}>
+            <FormControl fullWidth error={Boolean(errors.chainId)} required>
               <InputLabel id="token-gate-chain-label">Chain</InputLabel>
               <Select
                 labelId="token-gate-chain-label"
@@ -212,6 +236,24 @@ const TokenGateForm = (props: Props) => {
               name="description"
               error={Boolean(errors.description)}
               helperText={errors.description?.message || helpers.description}
+            />
+          )}
+        />
+
+        <Controller
+          name={'redirectUrl'}
+          control={control}
+          defaultValue={null}
+          render={({ field: { onChange, value } }) => (
+            <TextField
+              onChange={onChange}
+              value={value || ''}
+              fullWidth
+              id="token-gate-redirect-url"
+              label="Redirect URL"
+              name="redirectUrl"
+              error={Boolean(errors.redirectUrl)}
+              helperText={errors.redirectUrl?.message || helpers.redirectUrl}
             />
           )}
         />

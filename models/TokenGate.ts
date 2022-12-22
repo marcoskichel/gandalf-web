@@ -14,6 +14,7 @@ export interface TokenGate {
   chainId: number
   description?: string | null
   requirements: TokenGateRequirement[]
+  redirectUrl?: string | null
 }
 
 export type OwnedTokenGate = Owned<TokenGate>
