@@ -84,21 +84,25 @@ const TokenGate = () => {
 
   const handleApiResponse = useCallback(
     async (res: Response, stage: 'initial' | 'requirements') => {
-      const gate = (await res.json()) as TokenGate
-      const allMet = gate.requirements?.every((req) => req.met)
-      if (allMet && redirectUrl) {
-        const url = getUrl(redirectUrl as string)
-        window.location.href = url
+      if (res.status === 404) {
+        window.location.pathname = '/404'
       } else {
-        setState((prev) => ({
-          ...prev,
-          gate,
-          ...{
-            initialLoading: stage === 'initial' ? false : prev.initialLoading,
-            checkingRequirements:
-              stage === 'requirements' ? false : prev.checkingRequirements,
-          },
-        }))
+        const gate = (await res.json()) as TokenGate
+        const allMet = gate.requirements?.every((req) => req.met)
+        if (allMet && redirectUrl) {
+          const url = getUrl(redirectUrl as string)
+          window.location.href = url
+        } else {
+          setState((prev) => ({
+            ...prev,
+            gate,
+            ...{
+              initialLoading: stage === 'initial' ? false : prev.initialLoading,
+              checkingRequirements:
+                stage === 'requirements' ? false : prev.checkingRequirements,
+            },
+          }))
+        }
       }
     },
     [redirectUrl]

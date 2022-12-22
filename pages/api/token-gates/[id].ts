@@ -68,7 +68,7 @@ const checkAccountAgainstRequirements = async (
     return res.status(200).send(gate)
   }
 
-  return res.status(400).send({ message: 'Token gate not found.' })
+  return res.status(404).send({ message: 'Token gate not found.' })
 }
 
 const retrieveGate = async (
@@ -96,7 +96,7 @@ const retrieveGate = async (
     return res.status(200).send(gate)
   }
 
-  return res.status(400).send({ message: 'Token gate not found.' })
+  return res.status(404).send({ message: 'Token gate not found.' })
 }
 
 export default async function handler(
