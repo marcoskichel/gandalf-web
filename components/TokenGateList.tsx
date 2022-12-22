@@ -39,8 +39,17 @@ interface ItemProps {
   onClick?: () => void
 }
 
-const CopyToClipboard = ({ tokenGateId }: { tokenGateId: string }) => {
-  const url = `${window.location.origin}/token-gates/${tokenGateId}`
+const CopyToClipboard = ({
+  tokenGateId,
+  redirectUrl,
+}: {
+  tokenGateId: string
+  redirectUrl?: string | null
+}) => {
+  const url = redirectUrl?.length
+    ? `${window.location.origin}/token-gates/${tokenGateId}?redirectUrl=${redirectUrl}`
+    : `${window.location.origin}/token-gates/${tokenGateId}`
+
   const { currentTheme: theme } = useThemes()
   const { setToast } = useToaster()
 
@@ -90,7 +99,10 @@ const TokenGateListItem = (props: ItemProps) => {
         >
           <Typography variant="subtitle1">{tokenGate.name}</Typography>
           <Typography variant="body2">{tokenGate.description}</Typography>
-          <CopyToClipboard tokenGateId={tokenGateId} />
+          <CopyToClipboard
+            tokenGateId={tokenGateId}
+            redirectUrl={tokenGate.redirectUrl}
+          />
         </CardContent>
         <CardActions>
           <Button onClick={onClick} sx={{ marginLeft: 'auto' }}>

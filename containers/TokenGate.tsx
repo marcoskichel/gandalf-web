@@ -28,7 +28,6 @@ interface State {
   gate?: TokenGate
   initialLoading: boolean
   checkingRequirements: boolean
-  authenticated: boolean
 }
 
 const getUrl = (urlLike: string): string => {
@@ -46,6 +45,7 @@ const getUrl = (urlLike: string): string => {
 
 const Content = (props: { state: State }) => {
   const { state } = props
+
   const chain = SUPPORTED_CHAINS[
     state.gate?.chainId as number
   ] as BasicChainInformation
@@ -54,9 +54,9 @@ const Content = (props: { state: State }) => {
     <>
       <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
         {chain?.icon && (
-          <Image src={chain.icon} alt={chain.name} width={30} height={30} />
+          <Image src={chain?.icon} alt={chain?.name} width={30} height={30} />
         )}
-        <Typography variant="h6">{chain.name} Network</Typography>
+        <Typography variant="h6">{chain?.name} Network</Typography>
       </Box>
 
       {state.gate?.requirements?.map((req) => (
@@ -80,28 +80,39 @@ const TokenGate = () => {
   const [state, setState] = useState<State>({
     initialLoading: true,
     checkingRequirements: false,
-    authenticated: false,
   })
+
+  const handleApiResponse = useCallback(
+    async (res: Response, stage: 'initial' | 'requirements') => {
+      const gate = (await res.json()) as TokenGate
+      const allMet = gate.requirements?.every((req) => req.met)
+      if (allMet && redirectUrl) {
+        const url = getUrl(redirectUrl as string)
+        window.location.href = url
+      } else {
+        setState((prev) => ({
+          ...prev,
+          gate,
+          ...{
+            initialLoading: stage === 'initial' ? false : prev.initialLoading,
+            checkingRequirements:
+              stage === 'requirements' ? false : prev.checkingRequirements,
+          },
+        }))
+      }
+    },
+    [redirectUrl]
+  )
 
   useEffect(() => {
     const loadGate = async () => {
-      try {
-        if (gateId) {
-          const res = await fetch(`/api/token-gates/${gateId}`)
-          if (res.status === 204) {
-            const url = getUrl(redirectUrl as string)
-            window.location.href = url
-          } else {
-            const gate = await res.json()
-            setState((prev) => ({ ...prev, gate, initialLoading: false }))
-          }
-        }
-      } catch (error) {
-        console.error(error)
+      if (gateId) {
+        const res = await fetch(`/api/token-gates/${gateId}`)
+        handleApiResponse(res, 'initial')
       }
     }
     loadGate()
-  }, [gateId, push, redirectUrl])
+  }, [gateId, push, handleApiResponse, redirectUrl])
 
   useEffect(() => {
     const checkRequirements = async () => {
@@ -110,18 +121,12 @@ const TokenGate = () => {
         method: 'POST',
         body: JSON.stringify({ account: metamaskAccount }),
       })
-      if (res.status === 204) {
-        const url = getUrl(redirectUrl as string)
-        window.location.href = url
-      } else {
-        const gate = await res.json()
-        setState((prev) => ({ ...prev, gate, checkingRequirements: false }))
-      }
+      handleApiResponse(res, 'requirements')
     }
     if (metamaskAccount) {
       checkRequirements()
     }
-  }, [gateId, metamaskAccount, redirectUrl])
+  }, [gateId, metamaskAccount, handleApiResponse, redirectUrl])
 
   const connectMetamask = useCallback(async () => {
     if (!metamaskAccount) {

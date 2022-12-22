@@ -65,10 +65,6 @@ const checkAccountAgainstRequirements = async (
       path: '/',
     })
 
-    const allMet = gate.requirements.every((r) => r.met)
-    if (allMet) {
-      return res.status(204).send()
-    }
     return res.status(200).send(gate)
   }
 
@@ -97,10 +93,6 @@ const retrieveGate = async (
 
   const gate = await loadGate(gateId, status?.data()?.account)
   if (gate) {
-    const allMet = gate.requirements.every((r) => r.met)
-    if (allMet) {
-      return res.status(204).send()
-    }
     return res.status(200).send(gate)
   }
 
