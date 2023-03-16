@@ -18,7 +18,7 @@ const SignIn: NextPage = () => {
     <Themed>
       <ToasterContextProvider>
         <Head>
-          <title>Gandalf</title>
+          <title>BlueDome</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Navigation title="Sign In" />

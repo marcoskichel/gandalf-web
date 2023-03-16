@@ -23,7 +23,7 @@ const Home: NextPage = () => {
         <ToasterContextProvider>
           <Box>
             <Head>
-              <title>Gandalf</title>
+              <title>BlueDome</title>
               <meta
                 name="description"
                 content="The home page of the gandalf website"
