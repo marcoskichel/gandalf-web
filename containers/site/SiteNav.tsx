@@ -9,17 +9,29 @@ import {
   List,
   ListItem,
   ListItemButton,
-  ListItemText,
   Toolbar,
   Typography,
 } from '@mui/material'
 import { useState } from 'react'
+import Routes from '@constants/routes'
+import { useRouter } from 'next/router'
 
 const drawerWidth = 240
 
+interface NavItem {
+  title: string
+  path: Routes
+}
+
+const navItems: NavItem[] = [{ title: 'Sign In', path: Routes.signIn }]
+
 const SiteNav = () => {
-  const navItems = ['Sign In']
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  const handleNavItemClick = (item: NavItem) => {
+    router.push(item.path)
+  }
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState)
@@ -31,9 +43,12 @@ const SiteNav = () => {
       <Divider />
       <List>
         {navItems.map((item) => (
-          <ListItem key={item} disablePadding>
-            <ListItemButton sx={{ textAlign: 'center' }}>
-              <ListItemText primary={item} />
+          <ListItem key={item.title} disablePadding>
+            <ListItemButton
+              sx={{ textAlign: 'center' }}
+              onClick={() => handleNavItemClick(item)}
+            >
+              {item.title}
             </ListItemButton>
           </ListItem>
         ))}
@@ -43,7 +58,11 @@ const SiteNav = () => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar component="nav" sx={{ backgroundColor: 'transparent' }}>
+      <AppBar
+        position="fixed"
+        component="nav"
+        sx={{ backgroundColor: 'transparent' }}
+      >
         <Toolbar>
           <IconButton
             color="inherit"
@@ -63,8 +82,12 @@ const SiteNav = () => {
           </Typography>
           <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
             {navItems.map((item) => (
-              <Button key={item} sx={{ color: '#fff' }}>
-                {item}
+              <Button
+                key={item.title}
+                sx={{ color: '#fff' }}
+                onClick={() => handleNavItemClick(item)}
+              >
+                {item.title}
               </Button>
             ))}
           </Box>

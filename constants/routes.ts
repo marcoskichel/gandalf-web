@@ -1,7 +1,7 @@
 export enum Routes {
   signIn = '/sign-in',
-  home = '/',
-  tokenGateForm = '/token-gates/compose',
+  home = '/admin',
+  tokenGateForm = '/admin/token-gates/compose',
   authorization = '/authorization',
 }
 
