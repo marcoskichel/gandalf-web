@@ -1,27 +1,7 @@
 ## Getting Started
 
-### Pre-requisites
+Another project that I started along with some friends but never really went forward.
 
-- [Firebase CLI](https://firebase.google.com/docs/cli#install_the_firebase_cli)
-- Node.js v16.14.2
-- Java (required by the Firestore emulator)
+The app consisted of an web3 authentication mechanism for any kind of online community, where administrators could create "token gates", which specific requirements, like x number of a token and a NFT of a given collection, for example.
 
-This project uses Firestore and Auth emulators, so you need to have them running.
-
-```bash
-npm run emulators
-```
-
-Emulator dashboard will be available at [http://localhost:4000](http://localhost:4000), there will be data loaded from the `.firebase-emulators` folder, feel free to edit the data through the dashboard UI, it won't get saved permanently unless you start the emulators as following.
-
-```bash
-npm run emulators:export-on-exit
-```
-
-Then, start the development server:
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+You can see it live [here](https://gandalf-e3w7uzat5-marcoskichel.vercel.app/), just click the CTA and social login (username and password are not implemented), also dont mind the different project names all over the place, its just me being indecisive.
