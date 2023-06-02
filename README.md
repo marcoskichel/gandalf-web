@@ -1,6 +1,6 @@
 ## Getting Started
 
-Another project that I started along with some friends but never really went forward.
+Another project that I started along with a friend but never really went forward.
 
 The app consisted of an web3 authentication mechanism for any kind of online community, where administrators could create "token gates", which specific requirements, like x number of a token and a NFT of a given collection, for example.
 
