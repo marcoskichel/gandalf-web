@@ -4,7 +4,7 @@ import { useAuth } from '@contexts/AuthContext'
 import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
 import { useToaster } from '@contexts/ToasterContext'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { Box, Grid, Link } from '@mui/material'
+import { Box } from '@mui/material'
 import { FirebaseError } from 'firebase-admin'
 import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form'
@@ -81,18 +81,6 @@ const SignInForm = () => {
           onClick={onGoogleSignIn}
           text="Sign In with Google"
         />
-        <Grid container>
-          <Grid item xs>
-            <Link href="#" variant="body2">
-              Forgot password?
-            </Link>
-          </Grid>
-          <Grid item>
-            <Link href="#" variant="body2">
-              {"Don't have an account? Sign Up"}
-            </Link>
-          </Grid>
-        </Grid>
       </Box>
     </Box>
   )
