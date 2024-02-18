@@ -47,8 +47,8 @@ const CopyToClipboard = ({
   redirectUrl?: string | null
 }) => {
   const url = redirectUrl?.length
-    ? `${window.location.origin}/token-gates/${tokenGateId}?redirectUrl=${redirectUrl}`
-    : `${window.location.origin}/token-gates/${tokenGateId}`
+    ? `${window.location.origin}/admin/token-gates/${tokenGateId}?redirectUrl=${redirectUrl}`
+    : `${window.location.origin}/admin/token-gates/${tokenGateId}`
 
   const { currentTheme: theme } = useThemes()
   const { setToast } = useToaster()
