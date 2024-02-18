@@ -4,10 +4,10 @@ import { useAuth } from '@contexts/AuthContext'
 import { useGlobalLoading } from '@contexts/GlobalLoadingContext'
 import { useToaster } from '@contexts/ToasterContext'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { Box, Button, Grid, Link, TextField, Typography } from '@mui/material'
+import { Box, Grid, Link } from '@mui/material'
 import { FirebaseError } from 'firebase-admin'
 import { useRouter } from 'next/router'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { SchemaOf, object, string } from 'yup'
 
 interface FormData {
@@ -28,11 +28,7 @@ const SignInForm = () => {
   const { setToast } = useToaster()
   const { setNavigationLoading } = useGlobalLoading()
 
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<FormData>({
+  const { handleSubmit } = useForm<FormData>({
     resolver: yupResolver(schema),
   })
 
@@ -80,55 +76,6 @@ const SignInForm = () => {
       }}
     >
       <Box component="form" onSubmit={onSubmit} noValidate>
-        <Controller
-          name={'email'}
-          control={control}
-          render={({ field: { onChange, value } }) => (
-            <TextField
-              onChange={onChange}
-              value={value || ''}
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              error={Boolean(errors.email)}
-              helperText={errors.email?.message}
-            />
-          )}
-        />
-        <Controller
-          name={'password'}
-          control={control}
-          render={({ field: { onChange, value } }) => (
-            <TextField
-              onChange={onChange}
-              value={value || ''}
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              error={Boolean(errors.password)}
-              helperText={errors.password?.message}
-              inputProps={{ 'data-testid': 'password-input' }}
-            />
-          )}
-        />
-        <Button type="submit" fullWidth variant="contained" sx={{ mt: 3 }}>
-          Sign In
-        </Button>
-        <Box sx={{ m: 1 }}>
-          <Typography textAlign="center" variant="body2">
-            OR
-          </Typography>
-        </Box>
         <GoogleButton
           sx={{ mb: 2 }}
           onClick={onGoogleSignIn}
